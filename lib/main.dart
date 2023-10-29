@@ -8,6 +8,7 @@ import 'package:risho_guru/screens/splash_screen.dart';
 import 'package:risho_guru/screens/study_section_screen.dart';
 import 'package:risho_guru/screens/tools_screen.dart';
 import 'package:risho_guru/screens/welcome_screen.dart';
+import 'package:risho_guru/ui/colors.dart';
 
 void main() {
   runApp(RishoGuru());
@@ -24,7 +25,7 @@ class RishoGuru extends StatelessWidget {
           textTheme: TextTheme(
             bodyText2: TextStyle(
               fontFamily: 'Poppins', // Set the custom font as the default
-              fontSize: 16,
+              fontSize: 14,
             ),
             // You can define more text styles here as needed
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:risho_guru/ui/colors.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = "welcome_screen";
@@ -147,7 +148,8 @@ class _LoginFormState extends State<LoginForm> {
             const SizedBox(height: 20), // Add vertical space
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white, // Change the background color
+                backgroundColor:
+                    AppColors.primaryColor, // Change the background color
               ),
               onPressed: () {},
               child: Container(
@@ -156,7 +158,7 @@ class _LoginFormState extends State<LoginForm> {
                 alignment: Alignment.center,
                 child: Text(
                   'Login',
-                  style: TextStyle(color: Colors.grey[700]),
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ),
