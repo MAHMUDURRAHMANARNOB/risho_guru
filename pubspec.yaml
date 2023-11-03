@@ -19,6 +19,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  bloc: ^7.0.0
+  flutter_bloc: ^7.0.0
+  adaptive_navigation: ^0.0.9
+
   flutter_launcher_icons: "^0.13.1"
   flutter_lints: ^2.0.0
 

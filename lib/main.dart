@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risho_guru/screens/calendar_screen.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
+import 'package:risho_guru/screens/dashboard.dart';
 import 'package:risho_guru/screens/login_screen.dart';
 import 'package:risho_guru/screens/packages_screen.dart';
 import 'package:risho_guru/screens/registration_screen.dart';
@@ -9,6 +10,8 @@ import 'package:risho_guru/screens/study_section_screen.dart';
 import 'package:risho_guru/screens/tools_screen.dart';
 import 'package:risho_guru/screens/welcome_screen.dart';
 import 'package:risho_guru/ui/colors.dart';
+
+import 'blocs/navigation_bloc.dart';
 
 void main() {
   runApp(RishoGuru());
@@ -36,6 +39,7 @@ class RishoGuru extends StatelessWidget {
           WelcomeScreen.id: (context) => WelcomeScreen(),
           LoginScreen.id: (context) => LoginScreen(),
           RegistrationScreen.id: (context) => RegistrationScreen(),
+          Dashboard.id: (context) => Dashboard(),
           CoursesScreen.id: (context) => CoursesScreen(),
           StudySectionScreen.id: (context) => StudySectionScreen(),
           PackagesScreen.id: (context) => PackagesScreen(),
