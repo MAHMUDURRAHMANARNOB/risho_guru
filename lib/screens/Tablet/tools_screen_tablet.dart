@@ -13,6 +13,7 @@ class _ToolsScreenTabletState extends State<ToolsScreenTablet> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tools'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Tools Tablet'),
     );

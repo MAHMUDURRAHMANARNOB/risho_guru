@@ -13,6 +13,7 @@ class _StudyBoardMobileState extends State<StudyBoardMobile> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Study Board'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Study Board Mobile'),
     );

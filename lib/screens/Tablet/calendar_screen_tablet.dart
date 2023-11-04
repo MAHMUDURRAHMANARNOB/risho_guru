@@ -13,6 +13,7 @@ class _CalendarScreenTabletState extends State<CalendarScreenTablet> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Calendar'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Calendar Tablet'),
     );

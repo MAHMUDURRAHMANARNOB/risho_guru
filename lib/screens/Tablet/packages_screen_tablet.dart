@@ -13,6 +13,7 @@ class _PackagesScreenTabletState extends State<PackagesScreenTablet> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Packages'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Packages Tablet'),
     );

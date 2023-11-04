@@ -13,6 +13,7 @@ class _StudyBoardTabletState extends State<StudyBoardTablet> {
     return Scaffold(
       appBar: AppBar(
         title: Text('StudyBoard'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('StudyBoard Tablet'),
     );

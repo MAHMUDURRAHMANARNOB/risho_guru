@@ -13,6 +13,7 @@ class _HomeWorkScreenTabletState extends State<HomeWorkScreenTablet> {
     return Scaffold(
       appBar: AppBar(
         title: Text('HomeWork'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('HomeWork Tablet'),
     );

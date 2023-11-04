@@ -13,6 +13,7 @@ class _CalendarScreenMobileState extends State<CalendarScreenMobile> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Calendar'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Calendar Mobile'),
     );

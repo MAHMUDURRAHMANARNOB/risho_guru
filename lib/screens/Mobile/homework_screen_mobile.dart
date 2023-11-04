@@ -13,6 +13,7 @@ class _HomeWorkScreenMobileState extends State<HomeWorkScreenMobile> {
     return Scaffold(
       appBar: AppBar(
         title: Text('HomeWork'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('HomeWork Mobile'),
     );

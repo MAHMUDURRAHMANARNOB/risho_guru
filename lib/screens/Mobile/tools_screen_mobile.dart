@@ -13,6 +13,7 @@ class _ToolsScreenMobileState extends State<ToolsScreenMobile> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tools'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Tools Mobile'),
     );

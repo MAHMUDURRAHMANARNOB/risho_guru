@@ -13,6 +13,7 @@ class _CoursesScreenMobileState extends State<CoursesScreenMobile> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Courses'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Courses Mobile'),
     );

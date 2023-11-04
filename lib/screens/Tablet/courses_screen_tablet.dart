@@ -13,6 +13,7 @@ class _CoursesScreenTabletState extends State<CoursesScreenTablet> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Courses'),
+        automaticallyImplyLeading: false,
       ),
       body: Text('Courses Tablet'),
     );
