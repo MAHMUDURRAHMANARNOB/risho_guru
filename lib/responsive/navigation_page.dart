@@ -2,8 +2,12 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:adaptive_navigation/adaptive_navigation.dart';
+import 'package:risho_guru/screens/calendar_screen.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
+import 'package:risho_guru/screens/homeWork_screen.dart';
+import 'package:risho_guru/screens/packages_screen.dart';
 import 'package:risho_guru/screens/study_section_screen.dart';
+import 'package:risho_guru/screens/tools_screen.dart';
 import 'package:risho_guru/ui/colors.dart';
 import '../destinations.dart';
 
@@ -17,9 +21,13 @@ class NavigationPage extends StatefulWidget {
 class _NavigationPageState extends State<NavigationPage> {
   int _selectedIndex = 0;
 
+  bool extended = false;
+
   changeIndex(int index) {
     _selectedIndex = index;
-    setState(() {});
+    setState(() {
+      extended = !extended;
+    });
   }
 
   final destinations = <AdaptiveScaffoldDestination>[
@@ -43,63 +51,71 @@ class _NavigationPageState extends State<NavigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return /*AdaptiveNavigationScaffold(
-        body: Text('hello'),
-        selectedIndex: _selectedIndex,
-        destinations: destinations);*/
-        Scaffold(
+    return Scaffold(
       body: Row(
         children: [
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            labelType: showLabels()
-                ? NavigationRailLabelType.all
-                : NavigationRailLabelType.none,
-            destinations: destinations.asMap().entries.map((entry) {
-              final index = entry.key;
-              final destination = entry.value;
-              return NavigationRailDestination(
-                icon: GestureDetector(
-                  onTap: () {
-                    _navigateToScreen(index);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors
-                          .backgroundColorDark, // Customize the background color
-                    ),
-                    child: Icon(
-                      destination.icon,
-                      color: _selectedIndex == index
-                          ? AppColors.secondaryColor
-                          : Colors.white,
-                    ),
-                  ),
-                ),
-                label: showLabels()
-                    ? Text(
-                        destination.title,
-                        style: TextStyle(
-                          color: _selectedIndex == index
-                              ? AppColors.secondaryColor // Active label color
-                              : Colors.white, // Inactive label color
-                        ),
-                      )
-                    : Container(),
-              );
-            }).toList(),
-            onDestinationSelected: (int index) {
+          GestureDetector(
+            onTap: () {
               setState(() {
-                _selectedIndex = index;
+                extended = !extended;
               });
             },
+            child: NavigationRail(
+              groupAlignment: -1,
+              extended: extended,
+              selectedIndex: _selectedIndex,
+              labelType: showLabels()
+                  ? NavigationRailLabelType.none
+                  : NavigationRailLabelType.none,
+              destinations: destinations.asMap().entries.map((entry) {
+                final index = entry.key;
+                final destination = entry.value;
+                return NavigationRailDestination(
+                    icon: GestureDetector(
+                      onTap: () {
+                        _navigateToScreen(index);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors
+                              .backgroundColorDark, // Customize the background color
+                        ),
+                        child: Icon(
+                          destination.icon,
+                          color: _selectedIndex == index
+                              ? AppColors.secondaryColor
+                              : Colors.white,
+                        ),
+                      ),
+                    ),
+                    label: /*showLabels()
+                      ? */
+                        Text(
+                      destination.title,
+                      style: TextStyle(
+                        color: _selectedIndex == index
+                            ? AppColors.secondaryColor // Active label color
+                            : Colors.white, // Inactive label color
+                      ),
+                    )
+                    /*: Container(),*/
+                    );
+              }).toList(),
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
           ),
           // Add your content here
           Expanded(
             child: Center(
-              child: _getSelectedScreen(_selectedIndex),
+              child: Container(
+                child: _getSelectedScreen(_selectedIndex),
+              ),
             ),
           ),
         ],
@@ -117,6 +133,26 @@ class _NavigationPageState extends State<NavigationPage> {
         break;
       case 1:
         return StudySectionScreen();
+        /*Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
+        break;
+      case 2:
+        return HomeWorkScreen();
+        /*Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
+        break;
+      case 3:
+        return CalendarScreen();
+        /*Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
+        break;
+      case 4:
+        return ToolsScreen();
+        /*Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
+        break;
+      case 5:
+        return PackagesScreen();
         /*Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
         break;
