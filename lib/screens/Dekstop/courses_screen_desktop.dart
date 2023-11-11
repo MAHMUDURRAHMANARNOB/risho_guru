@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:risho_guru/ui/colors.dart';
 
 import '../Common/courses_card.dart';
@@ -82,81 +83,29 @@ class _CoursesScreenDesktopState extends State<CoursesScreenDesktop> {
               shrinkWrap: true,
               padding: const EdgeInsets.all(10.0),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 1.0,
+                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 5 : 4,
+                childAspectRatio: 0.75,
                 crossAxisSpacing: 10.0,
                 mainAxisSpacing: 10.0,
               ),
               itemCount: 10,
               itemBuilder: (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: AppColors.backgroundColorDark,
-                  ),
-                  child: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10.0),
-                          topRight: Radius.circular(10.0),
-                        ),
-                        child: Image(
-                          image: AssetImage("assets/images/math_class_7.png"),
-                          width: double.infinity,
-                          height: 150,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 10.0),
-                            Text(
-                              "Class-01",
-                              style:
-                                  TextStyle(fontSize: 12.0, color: Colors.grey),
-                            ),
-                            Text(
-                              "Elementary English",
-                              style: TextStyle(
-                                  fontSize: 16.0, fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "4.8",
-                                    ),
-                                    Icon(
-                                      Icons.star,
-                                      color: Colors.grey,
-                                      size: 14,
-                                    ),
-                                  ],
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primaryColor),
-                                  onPressed: () {},
-                                  child: Text("Enroll now"),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                return ProductCard(
+                  imageUrl:
+                      "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                  title: "Beginner",
+                  heading: "Study Alone",
+                  rating: 4.6,
+                  onButtonPressed: () {
+                    Fluttertoast.showToast(
+                        msg: "This is Center Short Toast",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  },
                 );
               },
             ),
