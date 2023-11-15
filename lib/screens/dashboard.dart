@@ -7,7 +7,6 @@ import 'package:risho_guru/screens/tools_screen.dart';
 
 import 'Common/navigation_drawer.dart';
 import 'Common/screens_manager.dart';
-import 'calendar_screen.dart';
 
 class Dashboard extends StatefulWidget {
   static const String id = "dashboard_screen";

@@ -2,9 +2,7 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:adaptive_navigation/adaptive_navigation.dart';
-import 'package:risho_guru/screens/calendar_screen.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
-import 'package:risho_guru/screens/homeWork_screen.dart';
 import 'package:risho_guru/screens/packages_screen.dart';
 import 'package:risho_guru/screens/study_section_screen.dart';
 import 'package:risho_guru/screens/tools_screen.dart';
@@ -34,10 +32,6 @@ class _NavigationPageState extends State<NavigationPage> {
     AdaptiveScaffoldDestination(
         title: 'Courses', icon: Icons.cast_for_education_outlined),
     AdaptiveScaffoldDestination(title: 'StudyBoard', icon: Icons.book_outlined),
-    AdaptiveScaffoldDestination(
-        title: 'HomeWork', icon: Icons.home_work_outlined),
-    AdaptiveScaffoldDestination(
-        title: 'Calender', icon: Icons.calendar_month_outlined),
     AdaptiveScaffoldDestination(title: 'Tools', icon: Icons.handyman),
     AdaptiveScaffoldDestination(
         title: 'Packages', icon: Icons.inventory_2_outlined),
@@ -137,21 +131,11 @@ class _NavigationPageState extends State<NavigationPage> {
           .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
         break;
       case 2:
-        return HomeWorkScreen();
-        /*Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
-        break;
-      case 3:
-        return CalendarScreen();
-        /*Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
-        break;
-      case 4:
         return ToolsScreen();
         /*Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
         break;
-      case 5:
+      case 3:
         return PackagesScreen();
         /*Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/

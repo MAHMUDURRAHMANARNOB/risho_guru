@@ -1,3 +1,6 @@
 class Course {
-  Course(String s, List<String> list);
+  final String name;
+  final List<String> lessons;
+
+  Course(this.name, this.lessons);
 }

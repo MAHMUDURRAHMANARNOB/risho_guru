@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:risho_guru/screens/calendar_screen.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
 import 'package:risho_guru/screens/dashboard.dart';
 import 'package:risho_guru/screens/login_screen.dart';
@@ -43,7 +42,6 @@ class RishoGuru extends StatelessWidget {
           CoursesScreen.id: (context) => CoursesScreen(),
           StudySectionScreen.id: (context) => StudySectionScreen(),
           PackagesScreen.id: (context) => PackagesScreen(),
-          CalendarScreen.id: (context) => CalendarScreen(),
           ToolsScreen.id: (context) => ToolsScreen(),
         });
   }
