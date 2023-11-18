@@ -14,7 +14,13 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
   bool _isPressed = false;
   int _selectedIndex = 0;
   String inputText = '';
-  List<List<int>> _selectedIndices = List.generate(3, (index) => []);
+  late List<List<int>> _selectedIndices;
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndices = List.generate(courses.length, (index) => []);
+  }
+
   int _selectedLessonIndex = -1;
 
   void togglePressed() {
@@ -29,6 +35,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     Course('Course 2', ['Chapter 1', 'Chapter 2', 'Chapter 3']),
     Course('Course 3', ['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4']),
   ];
+  late int courseIndex = 0;
   /*late List<List<int>> _selectedIndices;*/
 
   /*coursesList() {
@@ -42,6 +49,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
 
   List<String> _lessonContents = [];
   List<Widget> _lessonComponents = [];
+  bool isListViewVisible = true; // Add this variable
 
   @override
   Widget build(BuildContext context) {
@@ -56,21 +64,107 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
             flex: 2,
             child: Container(
               color: AppColors.backgroundColorDark,
-              child: Center(
-                child: ListView(
-                  children: courses.map((course) {
-                    int courseIndex = courses.indexOf(course);
-                    return ExpansionTile(
-                      title: Text(course.name),
-                      textColor: _selectedIndices[courseIndex].isNotEmpty
-                          ? AppColors.primaryColor
-                          : Colors.white,
-                      children: [
-                        _buildLessonList(courseIndex, course.lessons),
-                      ],
-                    );
-                  }).toList(),
-                ),
+              child: Column(
+                children: [
+                  // Your collapsible text here
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isListViewVisible = !isListViewVisible;
+                      });
+                      // Toggle the visibility of the text, or implement the desired behavior
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.primaryColor,
+                      ),
+                      margin: EdgeInsets.fromLTRB(10, 10.0, 10, 10.0),
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'My Courses',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(
+                            isListViewVisible
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: isListViewVisible,
+                    child: Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[600],
+                        ),
+                        child: Center(
+                          child: ListView(
+                            children: courses.map((course) {
+                              int courseIndex = courses.indexOf(course);
+                              return ExpansionTile(
+                                title: Text(course.name),
+                                textColor:
+                                    _selectedIndices[courseIndex].isNotEmpty
+                                        ? AppColors.primaryColor
+                                        : Colors.white,
+                                children: [
+                                  _buildLessonList(courseIndex, course.lessons),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        /*isListViewVisible = !isListViewVisible;*/
+                      });
+                      // Toggle the visibility of the text, or implement the desired behavior
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.primaryColor,
+                      ),
+                      margin: EdgeInsets.fromLTRB(10, 10.0, 10, 10.0),
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Recommended',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(
+                            isListViewVisible
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -124,8 +218,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                           setState(() {
                             _lessonContents
                                 .add('$inputText : ${DateTime.now()}');
-                            _lessonComponents
-                                .add(generateComponent(inputText, courseIndex));
+                            _lessonComponents.add(generateComponent(
+                                inputText, courseIndex, _selectedLessonIndex));
                           });
                         },
                         child: const Text('Send'),
@@ -142,6 +236,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
   }
 
   Widget _buildLessonList(int courseIndex, List<String> lessons) {
+    print("Course Index: $courseIndex");
+    print("Selected Lesson Index: $_selectedLessonIndex");
     return Column(
       children: lessons
           .asMap()
@@ -153,6 +249,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                   setState(() {
                     _selectedIndices[courseIndex].clear();
                     // _selectedIndex = courseIndex;
+                    _selectedLessonIndex = entry.key;
                     if (_selectedIndices[courseIndex].contains(entry.key)) {
                       _selectedIndices[courseIndex].remove(entry.key);
                       _lessonContents.remove(entry.value);
@@ -167,7 +264,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
-  Widget generateComponent(String inputText, int courseIndex) {
+  Widget generateComponent(String inputText, int courseIndex, int lessonIndex) {
     bool _isPressed = false;
     String selectedLessonName = _selectedLessonIndex != -1
         ? courses[courseIndex].lessons[_selectedLessonIndex]
@@ -242,8 +339,11 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                             // Implement your logic to show a popup menu here
                             // For example, use a PopupMenuButton
                             setState(() {
-                              showPopupMenuPOP(context, const Offset(0, 40),
-                                  context.findRenderObject() as RenderBox);
+                              showPopupMenuPOP(
+                                  context,
+                                  const Offset(0, 40),
+                                  context.findRenderObject() as RenderBox,
+                                  courseIndex);
                             });
                           },
                         ),
@@ -287,9 +387,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                       children: [
                         IconButton(
                           icon: Icon(
-                            _isPressed
-                                ? Icons.thumb_up
-                                : Icons.thumb_up_outlined,
+                            Icons.thumb_up_outlined,
                             color: AppColors.secondaryColor,
                             size: 14,
                           ),
@@ -320,8 +418,11 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                             // Implement your logic to show a popup menu here
                             // For example, use a PopupMenuButton
                             setState(() {
-                              showPopupMenuPOP(context, const Offset(0, 40),
-                                  context.findRenderObject() as RenderBox);
+                              showPopupMenuPOP(
+                                  context,
+                                  const Offset(0, 40),
+                                  context.findRenderObject() as RenderBox,
+                                  courseIndex);
                             });
                           },
                         ),
@@ -352,7 +453,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     }
   }
 
-  void showPopupMenuPOP(BuildContext context, Offset offset, RenderBox button) {
+  void showPopupMenuPOP(
+      BuildContext context, Offset offset, RenderBox button, int courseIndex) {
     final RenderBox overlay =
         Overlay.of(context)!.context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(

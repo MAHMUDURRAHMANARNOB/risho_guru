@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
 import 'package:risho_guru/screens/dashboard.dart';
+import 'package:risho_guru/screens/dashboard_screen.dart';
 import 'package:risho_guru/screens/login_screen.dart';
 import 'package:risho_guru/screens/packages_screen.dart';
 import 'package:risho_guru/screens/registration_screen.dart';
@@ -43,6 +44,7 @@ class RishoGuru extends StatelessWidget {
           StudySectionScreen.id: (context) => StudySectionScreen(),
           PackagesScreen.id: (context) => PackagesScreen(),
           ToolsScreen.id: (context) => ToolsScreen(),
+          DashboardScreen.id: (context) => DashboardScreen(),
         });
   }
 }

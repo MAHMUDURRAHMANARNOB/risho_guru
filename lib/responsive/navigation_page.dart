@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:adaptive_navigation/adaptive_navigation.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
+import 'package:risho_guru/screens/dashboard_screen.dart';
 import 'package:risho_guru/screens/packages_screen.dart';
 import 'package:risho_guru/screens/study_section_screen.dart';
 import 'package:risho_guru/screens/tools_screen.dart';
@@ -29,6 +30,8 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   final destinations = <AdaptiveScaffoldDestination>[
+    AdaptiveScaffoldDestination(
+        title: 'Dashboard', icon: Icons.dashboard_customize_outlined),
     AdaptiveScaffoldDestination(
         title: 'Courses', icon: Icons.cast_for_education_outlined),
     AdaptiveScaffoldDestination(title: 'StudyBoard', icon: Icons.book_outlined),
@@ -121,21 +124,26 @@ class _NavigationPageState extends State<NavigationPage> {
     Widget screen;
     switch (selectedIndex) {
       case 0:
-        return CoursesScreen();
+        return DashboardScreen();
         /*Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => CoursesScreen()));*/
         break;
       case 1:
+        return CoursesScreen();
+        /*Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => CoursesScreen()));*/
+        break;
+      case 2:
         return StudySectionScreen();
         /*Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
         break;
-      case 2:
+      case 3:
         return ToolsScreen();
         /*Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
         break;
-      case 3:
+      case 4:
         return PackagesScreen();
         /*Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => StudySectionScreen()));*/
