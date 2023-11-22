@@ -11,10 +11,11 @@ class _PackagesScreenDesktopState extends State<PackagesScreenDesktop> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*appBar: AppBar(
-        title: Text('Calendar'),
-      ),*/
-      body: Text('Packages Mobile'),
+      appBar: AppBar(
+        title: Text('Packages'),
+        automaticallyImplyLeading: false,
+      ),
+      body: Text('Packages Desktop'),
     );
   }
 }

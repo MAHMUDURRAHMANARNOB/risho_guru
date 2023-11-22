@@ -57,6 +57,27 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
       appBar: AppBar(
         title: const Text('Study Board'),
         automaticallyImplyLeading: false,
+        actions: [
+          Container(
+            margin: EdgeInsets.all(10.0),
+            child: ElevatedButton(
+              style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor),
+              onPressed: () {},
+              child: Row(
+                children: [
+                  Text("Earned Points: "),
+                  Text(
+                    "0",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       body: Row(
         children: [
@@ -213,6 +234,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                       ),
                       const SizedBox(width: 16.0),
                       ElevatedButton(
+                        style: OutlinedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor),
                         onPressed: () {
                           // Add your logic to send the message
                           setState(() {
