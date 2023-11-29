@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:risho_guru/providers/auth_provider.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
 import 'package:risho_guru/screens/dashboard.dart';
 import 'package:risho_guru/screens/dashboard_screen.dart';
@@ -11,10 +13,13 @@ import 'package:risho_guru/screens/tools_screen.dart';
 import 'package:risho_guru/screens/welcome_screen.dart';
 import 'package:risho_guru/ui/colors.dart';
 
-import 'blocs/navigation_bloc.dart';
-
 void main() {
-  runApp(RishoGuru());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AuthProvider(),
+      child: RishoGuru(),
+    ),
+  );
 }
 
 class RishoGuru extends StatelessWidget {

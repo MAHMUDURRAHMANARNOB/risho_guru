@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
 import 'package:risho_guru/screens/dashboard.dart';
 
+import '../../models/user.dart';
+import '../../providers/auth_provider.dart';
 import '../../ui/colors.dart';
 import '../registration_screen.dart';
+import 'error_dialog.dart';
 
 class Loginform extends StatefulWidget {
-  const Loginform({super.key});
+  Loginform({super.key});
 
   @override
   State<Loginform> createState() => _LoginformState();
 }
 
 class _LoginformState extends State<Loginform> {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   bool _obscureText = true;
   // Initially hide the password
   void _togglePasswordVisibility() {
@@ -61,6 +68,7 @@ class _LoginformState extends State<Loginform> {
                       ),
                     ),
                     TextField(
+                      controller: usernameController,
                       keyboardType: TextInputType.emailAddress,
                       cursorColor: AppColors.primaryColor,
                       style: TextStyle(
@@ -108,6 +116,7 @@ class _LoginformState extends State<Loginform> {
                       ),
                     ),
                     TextField(
+                      controller: passwordController,
                       keyboardType: TextInputType.visiblePassword,
                       style: TextStyle(color: Colors.black),
                       cursorColor: AppColors.primaryColor,
@@ -155,13 +164,53 @@ class _LoginformState extends State<Loginform> {
                   backgroundColor:
                       AppColors.primaryColor, // Change the background color
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Dashboard(),
-                    ),
-                  );
+                onPressed: () async {
+                  try {
+                    // Call the login method from the AuthProvider
+                    await Provider.of<AuthProvider>(context, listen: false)
+                        .login(
+                            usernameController.text, passwordController.text);
+
+                    // Check if the user is authenticated
+                    if (Provider.of<AuthProvider>(context, listen: false)
+                            .user !=
+                        null) {
+                      User user =
+                          Provider.of<AuthProvider>(context, listen: false)
+                              .user!;
+                      print("User ID: ${user.userID}");
+                      print("Username: ${user.username}");
+
+                      // Navigate to the DashboardScreen on successful login
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Dashboard(),
+                        ),
+                      );
+                    } else {
+                      // Handle unsuccessful login
+                      print("Login failed");
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ErrorDialog(
+                              message:
+                                  "Login failed, \ncheck username and password.");
+                        },
+                      );
+                    }
+                  } catch (error) {
+                    // Handle errors from the API call or login process
+                    print("Error during login: $error");
+                    // Show the custom error dialog
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ErrorDialog(message: error.toString());
+                      },
+                    );
+                  }
                 },
                 child: Container(
                   width: 350,

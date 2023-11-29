@@ -275,71 +275,84 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       /*Class / Grade*/
-                      Container(
-                        child: Row(
-                          children: [
-                            Text("Class / Grade"),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            DropdownMenu<String>(
-                              initialSelection: list.first,
-                              onSelected: (String? value) {
-                                // This is called when the user selects an item.
-                                setState(() {
-                                  dropdownValue = value!;
-                                });
-                              },
-                              dropdownMenuEntries: list
-                                  .map<DropdownMenuEntry<String>>(
-                                      (String value) {
-                                return DropdownMenuEntry<String>(
-                                    value: value, label: value);
-                              }).toList(),
-                            ),
-                          ],
+                      Expanded(
+                        child: Container(
+                          child: Row(
+                            children: [
+                              Text("Class / Grade"),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              DropdownMenu<String>(
+                                initialSelection: list.first,
+                                onSelected: (String? value) {
+                                  // This is called when the user selects an item.
+                                  setState(() {
+                                    dropdownValue = value!;
+                                  });
+                                },
+                                dropdownMenuEntries: list
+                                    .map<DropdownMenuEntry<String>>(
+                                        (String value) {
+                                  return DropdownMenuEntry<String>(
+                                      value: value, label: value);
+                                }).toList(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       /*Subject*/
-                      Container(
-                        child: Row(
-                          children: [
-                            Text("Subject"),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            DropdownMenu<String>(
-                              initialSelection: list.first,
-                              onSelected: (String? value) {
-                                // This is called when the user selects an item.
-                                setState(() {
-                                  dropdownValue = value!;
-                                });
-                              },
-                              dropdownMenuEntries: list
-                                  .map<DropdownMenuEntry<String>>(
-                                      (String value) {
-                                return DropdownMenuEntry<String>(
-                                    value: value, label: value);
-                              }).toList(),
-                            ),
-                          ],
+                      Expanded(
+                        child: Container(
+                          child: Row(
+                            children: [
+                              Text("Subject"),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              DropdownMenu<String>(
+                                initialSelection: list.first,
+                                onSelected: (String? value) {
+                                  // This is called when the user selects an item.
+                                  setState(() {
+                                    dropdownValue = value!;
+                                  });
+                                },
+                                dropdownMenuEntries: list
+                                    .map<DropdownMenuEntry<String>>(
+                                        (String value) {
+                                  return DropdownMenuEntry<String>(
+                                      value: value, label: value);
+                                }).toList(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      Container(
-                        width: 500,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Max Word',
-                            hintText:
-                                'Enter the maximum number of words allowed for the question',
+                      Expanded(
+                        child: Container(
+                          width: 500,
+                          child: TextField(
+                            cursorColor: AppColors.primaryColor,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                              labelText: 'Max Word',
+                              labelStyle:
+                                  TextStyle(color: AppColors.primaryColor),
+                              hintText: 'Enter the maximum number of words.',
+                            ),
+                            onChanged: (String value) {
+                              setState(() {
+                                _maxWord = value;
+                              });
+                            },
                           ),
-                          onChanged: (String value) {
-                            setState(() {
-                              _maxWord = value;
-                            });
-                          },
                         ),
                       )
                     ],
@@ -453,7 +466,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                               width: 80,
                               child: ElevatedButton(
                                 style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryColor),
+                                    backgroundColor: AppColors.secondaryColor),
                                 onPressed: () {},
                                 child: Text("Copy"),
                               ),

@@ -18,7 +18,7 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPageState extends State<NavigationPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
 
   bool extended = false;
 

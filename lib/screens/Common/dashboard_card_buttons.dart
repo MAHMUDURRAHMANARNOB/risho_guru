@@ -15,10 +15,10 @@ class DashboardCardButtons extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(10.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.primaryColor,
         borderRadius: BorderRadius.circular(8.0),
       ),
-      height: 150,
+      height: 50,
       width: 200,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -26,11 +26,8 @@ class DashboardCardButtons extends StatelessWidget {
           Text(
             cardTitle,
             style: TextStyle(
-                color: AppColors.primaryColor,
-                fontSize: 18,
-                fontWeight: FontWeight.bold),
+                color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 10),
         ],
       ),
     );

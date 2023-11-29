@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risho_guru/ui/colors.dart';
 
-import '../../data/models/course.dart';
+import '../../models/course.dart';
 
 class StudyBoardDesktop extends StatefulWidget {
   const StudyBoardDesktop({Key? key}) : super(key: key);
@@ -31,21 +31,30 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
   }
 
   List<Course> courses = [
-    Course('Course 1', ['Chapter 1', 'Chapter 2']),
-    Course('Course 2', ['Chapter 1', 'Chapter 2', 'Chapter 3']),
-    Course('Course 3', ['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4']),
+    Course('English for Today - Class 1',
+        ['How to Say Hello', 'How to greet your Elders']),
+    Course('Elementary Physics', [
+      'What is an Atom? - Lesson for Kids',
+      'What is Mass? - Lesson for Kids',
+      'Ions Lesson for Kids',
+      'Newton\'s Three Laws of Motion Lesson for Kids',
+      'The Theory of Relativity Lesson for Kids'
+    ]),
+    Course('Elementary Mathematics', [
+      '1. Number and Algebra',
+      '2. Geometry and measurement',
+      '3. Statistics and probability',
+    ]),
+    Course('Elementary Chemistry ', [
+      'States of Matter',
+      'Atoms and Elements',
+      'Molecules and Compounds',
+      'Solutions and Mixtures',
+      'The Periodic Table',
+      'Density'
+    ]),
   ];
   late int courseIndex = 0;
-  /*late List<List<int>> _selectedIndices;*/
-
-  /*coursesList() {
-    courses = [
-      Course('Course 1', ['Chapter 1', 'Chapter 2']),
-      Course('Course 2', ['Chapter 1', 'Chapter 2', 'Chapter 3']),
-      Course('Course 3', ['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4']),
-    ];
-    _selectedIndices = List.generate(courses.length, (index) => []);
-  }*/
 
   List<String> _lessonContents = [];
   List<Widget> _lessonComponents = [];
@@ -127,22 +136,42 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     visible: isListViewVisible,
                     child: Expanded(
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[600],
-                        ),
+                        margin: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
                         child: Center(
                           child: ListView(
                             children: courses.map((course) {
                               int courseIndex = courses.indexOf(course);
-                              return ExpansionTile(
-                                title: Text(course.name),
-                                textColor:
-                                    _selectedIndices[courseIndex].isNotEmpty
-                                        ? AppColors.primaryColor
-                                        : Colors.white,
-                                children: [
-                                  _buildLessonList(courseIndex, course.lessons),
-                                ],
+                              return Container(
+                                margin: EdgeInsets.all(2.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey[800],
+                                ),
+                                child: ExpansionTile(
+                                  title: Text(
+                                    course.name,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  textColor:
+                                      _selectedIndices[courseIndex].isNotEmpty
+                                          ? AppColors.primaryColor
+                                          : Colors.white,
+                                  children: [
+                                    Container(
+                                      margin: EdgeInsets.fromLTRB(5, 0, 5, 5),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(6),
+                                        color: Colors.grey[850],
+                                      ),
+                                      child: _buildLessonList(
+                                        courseIndex,
+                                        course.lessons,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               );
                             }).toList(),
                           ),
@@ -153,7 +182,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        /*isListViewVisible = !isListViewVisible;*/
+                        isListViewVisible = !isListViewVisible;
                       });
                       // Toggle the visibility of the text, or implement the desired behavior
                     },
@@ -222,10 +251,19 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     children: [
                       Expanded(
                         child: TextField(
-                          decoration: const InputDecoration(
+                          cursorColor: AppColors.primaryColor,
+                          decoration: InputDecoration(
                             hintText: 'Type your message...',
                             border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.add_circle_outline),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.add_circle_outline,
+                              color: AppColors.primaryColor,
+                            ),
                           ),
                           onChanged: (value) {
                             inputText = value;
@@ -245,7 +283,10 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                 inputText, courseIndex, _selectedLessonIndex));
                           });
                         },
-                        child: const Text('Send'),
+                        child: const Icon(
+                          Icons.send_rounded,
+                          size: 18,
+                        ),
                       ),
                     ],
                   ),
@@ -266,7 +307,12 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
           .asMap()
           .entries
           .map((entry) => ListTile(
-                title: Text(entry.value),
+                title: Text(
+                  "> " + entry.value,
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
                 selected: _selectedIndices[courseIndex].contains(entry.key),
                 onTap: () {
                   setState(() {
@@ -315,43 +361,50 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                          padding: EdgeInsets.all(5),
-                          onPressed: () {
-                            setState(() {
-                              togglePressed();
-                            });
-                          },
-                          icon: Padding(
-                            padding: EdgeInsets.zero,
-                            child: _isPressed == true
-                                ? Icon(
-                                    Icons.thumb_up,
-                                    color: AppColors.secondaryColor,
-                                    size: 14,
-                                  )
-                                : Icon(
-                                    Icons.thumb_up_outlined,
-                                    color: AppColors.secondaryColor,
-                                    size: 14,
-                                  ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.thumb_up_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
                           ),
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.audiotrack_outlined,
-                            color: AppColors.secondaryColor,
-                            size: 14,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                          onPressed: () {},
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.audiotrack_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
+                          ),
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.question_answer_outlined,
-                            color: AppColors.secondaryColor,
-                            size: 14,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                          onPressed: () {},
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.question_answer_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
+                          ),
                         ),
                         IconButton(
                           icon: Icon(
@@ -408,29 +461,50 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.thumb_up_outlined,
-                            color: AppColors.secondaryColor,
-                            size: 14,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                          onPressed: () {},
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.thumb_up_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
+                          ),
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.audiotrack_outlined,
-                            color: AppColors.secondaryColor,
-                            size: 14,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                          onPressed: () {},
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.audiotrack_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
+                          ),
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.question_answer_outlined,
-                            color: AppColors.secondaryColor,
-                            size: 14,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                          onPressed: () {},
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.question_answer_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
+                          ),
                         ),
                         IconButton(
                           icon: Icon(

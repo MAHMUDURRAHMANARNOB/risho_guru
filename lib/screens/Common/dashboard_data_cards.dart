@@ -19,7 +19,7 @@ class DashboardDataCards extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(10.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(color: Colors.white),
         borderRadius: BorderRadius.circular(8.0),
       ),
       height: 150,
@@ -42,12 +42,12 @@ class DashboardDataCards extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-                color: AppColors.backgroundColorDark,
+                color: AppColors.primaryColor,
                 borderRadius: BorderRadius.circular(6.0)),
             child: Text(
               cardCountNo,
               style: TextStyle(
-                color: AppColors.primaryColor,
+                color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),

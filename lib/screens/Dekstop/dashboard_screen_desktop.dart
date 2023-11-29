@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:risho_guru/screens/Common/dashboard_card_buttons.dart';
 import 'package:risho_guru/ui/colors.dart';
 
+import '../../providers/auth_provider.dart';
 import '../Common/dashboard_data_cards.dart';
 
 class DashboardScreenDesktop extends StatefulWidget {
@@ -21,38 +24,70 @@ class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
       ),
       body: Center(
         child: Container(
+          margin: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 0),
           height: double.infinity,
           width: double.infinity,
-          color: AppColors.backgroundColorDark,
           child: SingleChildScrollView(
             child: Column(
               children: [
                 Container(
                   margin: EdgeInsets.all(10.0),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Welcome",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                      Container(
+                        child: Row(
+                          children: [
+                            Text(
+                              "Welcome",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              '${Provider.of<AuthProvider>(context).user?.name ?? 'Unknown'}',
+                              style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "User",
-                        style: TextStyle(
-                            color: AppColors.primaryColor,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              child: Text(
+                                "Last Studied: ",
+                                style: TextStyle(color: AppColors.primaryColor),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryColor,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text("19 Nov, 2023"),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Expanded(
                       child: DashboardDataCards(
@@ -82,45 +117,6 @@ class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
                         imageUrl: 'assets/images/tickets.png',
                       ),
                     ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    // Left part
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(10.0),
-                        padding: EdgeInsets.all(15.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              child: Text(
-                                "Last Studied: ",
-                                style: TextStyle(color: AppColors.primaryColor),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryColor,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text("19 Nov, 2023"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Right part
                     Expanded(
                       child: DashboardDataCards(
                         cardTitle: "Remaining Comments",
@@ -128,6 +124,37 @@ class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
                         imageUrl: 'assets/images/comments.png',
                       ),
                     ),
+                  ],
+                ),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  margin: EdgeInsets.all(10.0),
+                  child: Text(
+                    "Ticket History",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    DashboardCardButtons(
+                      cardTitle: "Today",
+                    ),
+                    DashboardCardButtons(
+                      cardTitle: "Last 7 days",
+                    ),
+                    DashboardCardButtons(
+                      cardTitle: "See All",
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    /*Active package container*/
                     Container(
                       width: 200,
                       margin: EdgeInsets.all(10.0),
@@ -176,32 +203,6 @@ class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
                     ),
                   ],
                 ),
-                Container(
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.all(10.0),
-                  child: Text(
-                    "Ticket History",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    DashboardCardButtons(
-                      cardTitle: "Today",
-                    ),
-                    DashboardCardButtons(
-                      cardTitle: "Last 7 days",
-                    ),
-                    DashboardCardButtons(
-                      cardTitle: "See All",
-                    ),
-                  ],
-                )
               ],
             ),
           ),
