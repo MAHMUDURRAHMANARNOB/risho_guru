@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:risho_guru/ui/colors.dart';
-
+import 'package:provider/provider.dart';
 import '../../models/course.dart';
+import '../../providers/courses_provider.dart';
 
 class StudyBoardDesktop extends StatefulWidget {
   const StudyBoardDesktop({Key? key}) : super(key: key);
@@ -14,12 +15,24 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
   bool _isPressed = false;
   int _selectedIndex = 0;
   String inputText = '';
+  /*late List<Course> _courses;*/
   late List<List<int>> _selectedIndices;
+
   @override
   void initState() {
     super.initState();
-    _selectedIndices = List.generate(courses.length, (index) => []);
+    // Assuming you have a method to fetch courses, replace this with your actual logic
+    /*_courses = Provider.of<CourseProvider>(context, listen: false)
+        .fetchCourses() as List<Course>;*/
+    /*_courses = fetchCourses();*/
+    _selectedIndices = List.generate(_courses.length, (index) => []);
   }
+
+  /*@override
+  void initState() {
+    super.initState();
+    _selectedIndices = List.generate(courses.length, (index) => []);
+  }*/
 
   int _selectedLessonIndex = -1;
 
@@ -30,29 +43,101 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     });
   }
 
-  List<Course> courses = [
-    Course('English for Today - Class 1',
-        ['How to Say Hello', 'How to greet your Elders']),
-    Course('Elementary Physics', [
-      'What is an Atom? - Lesson for Kids',
-      'What is Mass? - Lesson for Kids',
-      'Ions Lesson for Kids',
-      'Newton\'s Three Laws of Motion Lesson for Kids',
-      'The Theory of Relativity Lesson for Kids'
-    ]),
-    Course('Elementary Mathematics', [
-      '1. Number and Algebra',
-      '2. Geometry and measurement',
-      '3. Statistics and probability',
-    ]),
-    Course('Elementary Chemistry ', [
-      'States of Matter',
-      'Atoms and Elements',
-      'Molecules and Compounds',
-      'Solutions and Mixtures',
-      'The Periodic Table',
-      'Density'
-    ]),
+  List<Course> _courses = [
+    Course(
+      courseName: 'English for Today - Class 1',
+      courseId: 1,
+      chapters: [
+        Chapter(
+          lessonId: 67,
+          courseId: 1,
+          lessonTitle: 'abcx',
+          isChapter: 'Y',
+          seqNo: 1,
+          isActive: '1',
+          chapterIndex: 1,
+          lessonList: [
+            Lesson(
+              lessonId: 71,
+              courseId: 1,
+              lessonTitle: 'second row',
+              isChapter: 'N',
+              seqNo: 2,
+              isActive: '1',
+              chapterIndex: 1,
+            ),
+          ],
+        ),
+        Chapter(
+          lessonId: 68,
+          courseId: 1,
+          lessonTitle: 'avcx',
+          isChapter: 'Y',
+          seqNo: 3,
+          isActive: '1',
+          chapterIndex: 2,
+          lessonList: [
+            Lesson(
+              lessonId: 69,
+              courseId: 1,
+              lessonTitle: 'nnnx',
+              isChapter: 'N',
+              seqNo: 4,
+              isActive: '1',
+              chapterIndex: 2,
+            ),
+          ],
+        ),
+      ],
+      courseDescription: '',
+    ),
+    Course(
+      courseName: 'English for Today - Class 1',
+      courseId: 2,
+      chapters: [
+        Chapter(
+          lessonId: 67,
+          courseId: 1,
+          lessonTitle: 'abcx',
+          isChapter: 'Y',
+          seqNo: 1,
+          isActive: '1',
+          chapterIndex: 1,
+          lessonList: [
+            Lesson(
+              lessonId: 71,
+              courseId: 1,
+              lessonTitle: 'second row',
+              isChapter: 'N',
+              seqNo: 2,
+              isActive: '1',
+              chapterIndex: 1,
+            ),
+          ],
+        ),
+        Chapter(
+          lessonId: 68,
+          courseId: 1,
+          lessonTitle: 'avcx',
+          isChapter: 'Y',
+          seqNo: 3,
+          isActive: '1',
+          chapterIndex: 2,
+          lessonList: [
+            Lesson(
+              lessonId: 69,
+              courseId: 1,
+              lessonTitle: 'nnnx',
+              isChapter: 'N',
+              seqNo: 4,
+              isActive: '1',
+              chapterIndex: 2,
+            ),
+          ],
+        ),
+      ],
+      courseDescription: '',
+    ),
   ];
   late int courseIndex = 0;
 
@@ -139,8 +224,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                         margin: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
                         child: Center(
                           child: ListView(
-                            children: courses.map((course) {
-                              int courseIndex = courses.indexOf(course);
+                            children: _courses.map((course) {
+                              int courseIndex = _courses.indexOf(course);
                               return Container(
                                 margin: EdgeInsets.all(2.0),
                                 decoration: BoxDecoration(
@@ -149,7 +234,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                 ),
                                 child: ExpansionTile(
                                   title: Text(
-                                    course.name,
+                                    course.courseName,
                                     style: TextStyle(
                                       fontSize: 14,
                                     ),
@@ -158,19 +243,27 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                       _selectedIndices[courseIndex].isNotEmpty
                                           ? AppColors.primaryColor
                                           : Colors.white,
-                                  children: [
-                                    Container(
+                                  children: course.chapters.map((chapter) {
+                                    int chapterIndex =
+                                        course.chapters.indexOf(chapter);
+                                    return Container(
                                       margin: EdgeInsets.fromLTRB(5, 0, 5, 5),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(6),
                                         color: Colors.grey[850],
                                       ),
-                                      child: _buildLessonList(
-                                        courseIndex,
-                                        course.lessons,
+                                      child: ExpansionTile(
+                                        title: Text(
+                                          chapter.lessonTitle,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        children: _buildLessonList(
+                                            courseIndex, chapter.lessonList),
                                       ),
-                                    ),
-                                  ],
+                                    );
+                                  }).toList(),
                                 ),
                               );
                             }).toList(),
@@ -251,6 +344,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     children: [
                       Expanded(
                         child: TextField(
+                          maxLines: 3,
+                          minLines: 1,
                           cursorColor: AppColors.primaryColor,
                           decoration: InputDecoration(
                             hintText: 'Type your message...',
@@ -272,8 +367,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                       ),
                       const SizedBox(width: 16.0),
                       ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.backgroundColorDark),
                         onPressed: () {
                           // Add your logic to send the message
                           setState(() {
@@ -285,6 +380,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                         },
                         child: const Icon(
                           Icons.send_rounded,
+                          color: AppColors.primaryColor,
                           size: 18,
                         ),
                       ),
@@ -299,7 +395,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
-  Widget _buildLessonList(int courseIndex, List<String> lessons) {
+  /*Widget _buildLessonList(
+      int courseIndex, List<String> lessons, int chapterIndex) {
     print("Course Index: $courseIndex");
     print("Selected Lesson Index: $_selectedLessonIndex");
     return Column(
@@ -331,12 +428,75 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
               ))
           .toList(),
     );
+  }*/
+  /*List<Widget> _buildLessonList(int courseIndex, List<Lesson> lessons) {
+    print("Course Index: $courseIndex");
+    print("Selected Lesson Index: $_selectedLessonIndex");
+    return lessons
+        .map((lesson) => ListTile(
+              title: Text(
+                "> " + lesson.lessonTitle,
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              selected: _selectedIndices[courseIndex]
+                  .contains(lessons.indexOf(lesson)),
+              onTap: () {
+                setState(() {
+                  _selectedIndices[courseIndex].clear();
+                  _selectedLessonIndex = lessons.indexOf(lesson);
+                  if (_selectedIndices[courseIndex]
+                      .contains(lessons.indexOf(lesson))) {
+                    _selectedIndices[courseIndex]
+                        .remove(lessons.indexOf(lesson));
+                    _lessonContents.remove(lesson.lessonTitle);
+                  } else {
+                    _selectedIndices[courseIndex].add(lessons.indexOf(lesson));
+                    _lessonContents.add(lesson.lessonTitle);
+                  }
+                });
+              },
+            ))
+        .toList();
+  }*/
+  List<Widget> _buildLessonList(int courseIndex, List<Lesson> lessons) {
+    return lessons.map((lesson) {
+      return ListTile(
+        title: Text(
+          "> " + lesson.lessonTitle,
+          style: TextStyle(
+            fontSize: 14,
+          ),
+        ),
+        selected:
+            _selectedIndices[courseIndex].contains(lessons.indexOf(lesson)),
+        onTap: () {
+          setState(() {
+            _selectedLessonIndex = lessons.indexOf(lesson);
+            _selectedIndices[courseIndex].clear();
+            if (_selectedIndices[courseIndex]
+                .contains(lessons.indexOf(lesson))) {
+              _selectedIndices[courseIndex].remove(lessons.indexOf(lesson));
+              _lessonContents.remove(lesson.lessonTitle);
+            } else {
+              _selectedIndices[courseIndex].add(lessons.indexOf(lesson));
+              _lessonContents.add(lesson.lessonTitle);
+            }
+          });
+        },
+      );
+    }).toList();
   }
 
   Widget generateComponent(String inputText, int courseIndex, int lessonIndex) {
     bool _isPressed = false;
     String selectedLessonName = _selectedLessonIndex != -1
-        ? courses[courseIndex].lessons[_selectedLessonIndex]
+        ? _courses[courseIndex]
+            .chapters
+            .expand((chapter) => chapter.lessonList)
+            .toList()[_selectedLessonIndex]
+            .lessonTitle
         : '';
     switch (inputText.toLowerCase()) {
       case 'image':

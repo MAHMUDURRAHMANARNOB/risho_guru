@@ -1,6 +1,9 @@
 import 'package:custom_button_builder/custom_button_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../providers/auth_provider.dart';
+import '../../providers/tools_provider.dart';
 import '../../ui/colors.dart';
 
 class ToolsScreenDesktop extends StatefulWidget {
@@ -10,19 +13,47 @@ class ToolsScreenDesktop extends StatefulWidget {
   State<ToolsScreenDesktop> createState() => _ToolsScreenDesktopState();
 }
 
+List<String> _lessonContents = [];
+List<Widget> _lessonComponents = [];
+
 const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 
 class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
   bool isSelected = false;
   String dropdownValue = list.first;
 
+  ElevatedButton buildToolButton(String toolName) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primaryColor,
+      ),
+      onPressed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("$toolName Selected"),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      },
+      child: Text(toolName),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final toolsProvider = ToolsProvider(userId: authProvider.user?.id ?? 0);
+    print(toolsProvider.userId);
+    if (authProvider.user != null) {
+      toolsProvider.userId = authProvider.user!.id;
+      print('Setting userId for ToolsProvider: ${toolsProvider.userId}');
+    }
     String _className = 'Select';
     String _subject = 'Select';
     String _maxWord = '';
     String _question = '';
     String _answer = '';
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Tools'),
@@ -35,232 +66,30 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
             child: Container(
               height: double.infinity,
               color: AppColors.backgroundColorDark,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    /*Math*/
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Math Selected"),
-                              duration: Duration(seconds: 1),
-                            ),
+              child: FutureBuilder(
+                future:
+                    toolsProvider.fetchTools(), // Call the fetchTools method
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    // Display your list of tools
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: toolsProvider.tools.map((tool) {
+                          return Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                            height: 50,
+                            child: buildToolButton(tool.toolName),
                           );
-                          // Open Instagram app
-                        },
-                        child: const Text("Math"),
+                        }).toList(),
                       ),
-                    ),
-                    /*Unseen Question*/
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Unseen Question Selected"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Unseen Question"),
-                      ),
-                    ),
-                    /*Fill in the blank (grammar)*/
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Fill in the blank (grammar) Selected"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Fill in the blank (grammar)"),
-                      ),
-                    ),
-                    /*Comprehension selected*/
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Comprehension Selected"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Comprehension"),
-                      ),
-                    ),
-                    /*Letter writing*/
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Letter writing Selected"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Letter writing"),
-                      ),
-                    ),
-                    /*Essay writing*/
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Essay writing Selected"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Essay writing"),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Pressed Follow on Instagram button"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Paragraph Writing"),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Pressed Follow on Instagram button"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Answer Preparation"),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Pressed Follow on Instagram button"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Youtube note"),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Pressed Follow on Instagram button"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Text grammar check"),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      height: 50,
-                      child: ElevatedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Pressed Follow on Instagram button"),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                          // Open Instagram app
-                        },
-                        child: const Text("Custom Study"),
-                      ),
-                    ),
-                  ],
-                ),
+                    );
+                  }
+                },
               ),
             ),
           ),
@@ -270,221 +99,107 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
               margin: EdgeInsets.all(10),
               child: Column(
                 children: [
-                  /*1st row*/
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      /*Class / Grade*/
-                      Expanded(
-                        child: Container(
-                          child: Row(
-                            children: [
-                              Text("Class / Grade"),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              DropdownMenu<String>(
-                                initialSelection: list.first,
-                                onSelected: (String? value) {
-                                  // This is called when the user selects an item.
-                                  setState(() {
-                                    dropdownValue = value!;
-                                  });
-                                },
-                                dropdownMenuEntries: list
-                                    .map<DropdownMenuEntry<String>>(
-                                        (String value) {
-                                  return DropdownMenuEntry<String>(
-                                      value: value, label: value);
-                                }).toList(),
-                              ),
-                            ],
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      color: Colors.grey[800],
+                      child: ListView.builder(
+                        itemCount: _lessonComponents.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          // Replace this with your actual component widget based on your data
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 15.0),
+                            padding: const EdgeInsets.all(12.0),
+                            decoration: BoxDecoration(
+                              color: AppColors.backgroundColorDark,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: _lessonComponents[index],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  /*BOTTOM CONTROL*/
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundColorDark,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.backgroundColorDark,
+                          ),
+                          child: Icon(
+                            Icons.add_circle_outline,
+                            color: AppColors.primaryColor,
                           ),
                         ),
-                      ),
-                      /*Subject*/
-                      Expanded(
-                        child: Container(
-                          child: Row(
-                            children: [
-                              Text("Subject"),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              DropdownMenu<String>(
-                                initialSelection: list.first,
-                                onSelected: (String? value) {
-                                  // This is called when the user selects an item.
-                                  setState(() {
-                                    dropdownValue = value!;
-                                  });
-                                },
-                                dropdownMenuEntries: list
-                                    .map<DropdownMenuEntry<String>>(
-                                        (String value) {
-                                  return DropdownMenuEntry<String>(
-                                      value: value, label: value);
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          width: 500,
+                        Expanded(
                           child: TextField(
+                            maxLines: 3,
+                            minLines: 1,
                             cursorColor: AppColors.primaryColor,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
+                              hintText: 'Type your message...',
                               border: OutlineInputBorder(),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: AppColors.primaryColor,
                                 ),
                               ),
-                              labelText: 'Max Word',
-                              labelStyle:
-                                  TextStyle(color: AppColors.primaryColor),
-                              hintText: 'Enter the maximum number of words.',
                             ),
-                            onChanged: (String value) {
-                              setState(() {
-                                _maxWord = value;
-                              });
-                            },
+                            onChanged: (value) {},
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  /*2nd Row*/
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 8,
-                        child: TextField(
-                          maxLines: 3,
-                          minLines: 2,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Question',
-                            hintText: 'Enter the question',
+                        Container(
+                          child: Row(
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      AppColors.backgroundColorDark,
+                                ),
+                                child: Icon(
+                                  Icons.image_rounded,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      AppColors.backgroundColorDark,
+                                ),
+                                child: Icon(
+                                  Icons.keyboard_rounded,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      AppColors.backgroundColorDark,
+                                ),
+                                child: Icon(
+                                  Icons.send_rounded,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ],
                           ),
-                          onChanged: (String value) {
-                            setState(() {
-                              _question = value;
-                            });
-                          },
                         ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 120,
-                              child: ElevatedButton(
-                                style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryColor),
-                                onPressed: () {},
-                                child: Text("Keyboard"),
-                              ),
-                            ),
-                            SizedBox(height: 5.0),
-                            Container(
-                              width: 120,
-                              child: ElevatedButton(
-                                style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryColor),
-                                onPressed: () {},
-                                child: Text("Add Image"),
-                              ),
-                            ),
-                            SizedBox(height: 5.0),
-                            Container(
-                              width: 120,
-                              child: ElevatedButton(
-                                style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryColor),
-                                onPressed: () {},
-                                child: Text("Generate"),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  /*3rd Row*/
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          maxLines: 15,
-                          minLines: 10,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Answer Question',
-                          ),
-                          onChanged: (String value) {
-                            setState(() {
-                              _question = value;
-                            });
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  /*4th Reo*/
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        alignment: Alignment.topLeft,
-                        width: 150,
-                        child: ElevatedButton(
-                          style: OutlinedButton.styleFrom(
-                              backgroundColor: AppColors.primaryColor),
-                          onPressed: () {},
-                          child: Text("Request Review"),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.topRight,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 80,
-                              child: ElevatedButton(
-                                style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColors.secondaryColor),
-                                onPressed: () {},
-                                child: Text("Copy"),
-                              ),
-                            ),
-                            SizedBox(width: 5.0),
-                            Container(
-                              width: 80,
-                              child: ElevatedButton(
-                                style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryColor),
-                                onPressed: () {},
-                                child: Text("Save"),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   )
                 ],
               ),

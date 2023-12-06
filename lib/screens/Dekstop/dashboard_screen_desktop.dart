@@ -5,6 +5,7 @@ import 'package:risho_guru/screens/Common/dashboard_card_buttons.dart';
 import 'package:risho_guru/ui/colors.dart';
 
 import '../../providers/auth_provider.dart';
+import '../../providers/subscriptionStatus_provider.dart';
 import '../Common/dashboard_data_cards.dart';
 
 class DashboardScreenDesktop extends StatefulWidget {
@@ -15,8 +16,20 @@ class DashboardScreenDesktop extends StatefulWidget {
 }
 
 class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
+  late SubscriptionStatusProvider statusProvider;
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final statusProvider =
+        SubscriptionStatusProvider(userId: authProvider.user?.id ?? 0);
+    print(statusProvider.userId);
+    if (authProvider.user != null) {
+      statusProvider.userId = authProvider.user!.id;
+      print('Setting userId for ToolsProvider: ${statusProvider.userId}');
+    }
+    // Call fetchData when the widget is first created
+    Provider.of<SubscriptionStatusProvider>(context, listen: false).fetchData();
     return Scaffold(
       appBar: AppBar(
         title: Text('Dashboard'),
@@ -113,14 +126,16 @@ class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
                     Expanded(
                       child: DashboardDataCards(
                         cardTitle: "Remaining Tickets",
-                        cardCountNo: "132",
+                        cardCountNo:
+                            "${Provider.of<SubscriptionStatusProvider>(context).subscriptionStatus.ticketsavailable}",
                         imageUrl: 'assets/images/tickets.png',
                       ),
                     ),
                     Expanded(
                       child: DashboardDataCards(
                         cardTitle: "Remaining Comments",
-                        cardCountNo: "132",
+                        cardCountNo:
+                            "${Provider.of<SubscriptionStatusProvider>(context).subscriptionStatus.commentsavailable}",
                         imageUrl: 'assets/images/comments.png',
                       ),
                     ),
@@ -128,8 +143,8 @@ class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
                 ),
                 Container(
                   alignment: Alignment.centerLeft,
-                  margin: EdgeInsets.all(10.0),
-                  child: Text(
+                  margin: const EdgeInsets.all(10.0),
+                  child: const Text(
                     "Ticket History",
                     style: TextStyle(
                       color: Colors.white,
@@ -138,7 +153,7 @@ class _DashboardScreenDesktopState extends State<DashboardScreenDesktop> {
                     ),
                   ),
                 ),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     DashboardCardButtons(

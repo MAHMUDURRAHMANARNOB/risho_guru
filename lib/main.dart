@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:risho_guru/providers/auth_provider.dart';
+import 'package:risho_guru/providers/courses_provider.dart';
+import 'package:risho_guru/providers/subscriptionStatus_provider.dart';
+import 'package:risho_guru/providers/tools_provider.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
 import 'package:risho_guru/screens/dashboard.dart';
 import 'package:risho_guru/screens/dashboard_screen.dart';
@@ -15,8 +18,14 @@ import 'package:risho_guru/ui/colors.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => ToolsProvider(userId: 0)),
+        ChangeNotifierProvider(
+            create: (context) => SubscriptionStatusProvider(userId: 0)),
+        ChangeNotifierProvider(create: (context) => CourseProvider(userId: 0)),
+      ],
       child: RishoGuru(),
     ),
   );
