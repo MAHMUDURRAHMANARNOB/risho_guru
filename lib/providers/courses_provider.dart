@@ -12,14 +12,18 @@ class CourseProvider with ChangeNotifier {
   CourseProvider({required this.userId});
 
   // Add a method to fetch courses from your API
-  Future<void> fetchCourses() async {
+  Future<List<Course>> fetchCourses() async {
     try {
       /*userId = 1;*/
-      _courses = await _apiService.fetchSubscribedCourses(userId);
+      _courses = await _apiService.fetchSubscribedCourses(59317);
+
+      print("Courses are: " + _courses.toString());
       notifyListeners();
+      return _courses!;
     } catch (error) {
       print('Error fetching courses: $error');
       // Handle error as needed
+      throw error;
     }
   }
 }

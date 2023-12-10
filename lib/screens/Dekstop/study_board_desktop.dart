@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:risho_guru/ui/colors.dart';
 import 'package:provider/provider.dart';
 import '../../models/course.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/courses_provider.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 class StudyBoardDesktop extends StatefulWidget {
   const StudyBoardDesktop({Key? key}) : super(key: key);
@@ -15,17 +17,18 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
   bool _isPressed = false;
   int _selectedIndex = 0;
   String inputText = '';
-  /*late List<Course> _courses;*/
+  late List<Course>? _courses = [];
   late List<List<int>> _selectedIndices;
 
   @override
   void initState() {
     super.initState();
     // Assuming you have a method to fetch courses, replace this with your actual logic
-    /*_courses = Provider.of<CourseProvider>(context, listen: false)
-        .fetchCourses() as List<Course>;*/
-    /*_courses = fetchCourses();*/
-    _selectedIndices = List.generate(_courses.length, (index) => []);
+    /*Provider.of<CourseProvider>(context, listen: false);
+    */ /*_courses = fetchCourses();*/ /*
+    _courses = context.watch<CourseProvider>().courses;
+    _selectedIndices = List.generate(_courses!.length, (index) => []);*/
+    _selectedIndices = List.generate(_courses!.length, (index) => []);
   }
 
   /*@override
@@ -43,7 +46,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     });
   }
 
-  List<Course> _courses = [
+  /*List<Course> _courses = [
     Course(
       courseName: 'English for Today - Class 1',
       courseId: 1,
@@ -138,15 +141,23 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
       ],
       courseDescription: '',
     ),
-  ];
-  late int courseIndex = 0;
+  ];*/
+  late int courseIndex;
 
   List<String> _lessonContents = [];
   List<Widget> _lessonComponents = [];
-  bool isListViewVisible = true; // Add this variable
+  bool isListViewVisible = false; // Add this variable
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    /*final courseProvider = CourseProvider(userId: authProvider.user?.id ?? 0);*/
+    final courseProvider = context.read<CourseProvider>();
+
+    _courses = courseProvider.courses ?? [];
+
+    print("courses in studyboard = $_courses");
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Study Board'),
@@ -223,50 +234,52 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                       child: Container(
                         margin: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
                         child: Center(
-                          child: ListView(
-                            children: _courses.map((course) {
-                              int courseIndex = _courses.indexOf(course);
-                              return Container(
-                                margin: EdgeInsets.all(2.0),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.grey[800],
-                                ),
-                                child: ExpansionTile(
-                                  title: Text(
-                                    course.courseName,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  textColor:
-                                      _selectedIndices[courseIndex].isNotEmpty
-                                          ? AppColors.primaryColor
-                                          : Colors.white,
-                                  children: course.chapters.map((chapter) {
-                                    int chapterIndex =
-                                        course.chapters.indexOf(chapter);
+                          child: FutureBuilder<List<Course>>(
+                            future:
+                                context.read<CourseProvider>().fetchCourses(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.hasError ||
+                                  snapshot.data == null) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                final courses = snapshot.data ?? [];
+                                if (courses.isEmpty) {
+                                  return Text(
+                                      'No courses available.'); // Handle empty course list
+                                }
+
+                                return ListView.builder(
+                                  itemCount: courses.length,
+                                  itemBuilder: (context, courseIndex) {
+                                    var course = courses[courseIndex];
                                     return Container(
-                                      margin: EdgeInsets.fromLTRB(5, 0, 5, 5),
+                                      margin: EdgeInsets.all(2.0),
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(6),
-                                        color: Colors.grey[850],
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Colors.grey[800],
                                       ),
                                       child: ExpansionTile(
                                         title: Text(
-                                          chapter.lessonTitle,
+                                          course.courseName,
                                           style: TextStyle(
                                             fontSize: 14,
                                           ),
                                         ),
+                                        /*textColor: _selectedIndices[courseIndex]
+                                                .isNotEmpty
+                                            ? AppColors.primaryColor
+                                            : Colors.white,*/
                                         children: _buildLessonList(
-                                            courseIndex, chapter.lessonList),
+                                            courseIndex, course.chapters),
                                       ),
                                     );
-                                  }).toList(),
-                                ),
-                              );
-                            }).toList(),
+                                  },
+                                );
+                              }
+                            },
                           ),
                         ),
                       ),
@@ -374,8 +387,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                           setState(() {
                             _lessonContents
                                 .add('$inputText : ${DateTime.now()}');
-                            _lessonComponents.add(generateComponent(
-                                inputText, courseIndex, _selectedLessonIndex));
+                            /*_lessonComponents.add(generateComponent(
+                                inputText, courseIndex, _selectedLessonIndex));*/
                           });
                         },
                         child: const Icon(
@@ -460,7 +473,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
             ))
         .toList();
   }*/
-  List<Widget> _buildLessonList(int courseIndex, List<Lesson> lessons) {
+  /*List<Widget> _buildLessonList(int courseIndex, List<Lesson> lessons) {
     return lessons.map((lesson) {
       return ListTile(
         title: Text(
@@ -487,9 +500,51 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
         },
       );
     }).toList();
+  }*/
+
+  List<Widget> _buildLessonList(int courseIndex, List<Chapters> chapters) {
+    print("Course Index: $courseIndex");
+    print("Number of chapters: ${chapters.length}");
+    return chapters.map((chapter) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ExpansionTile(
+            title: Text(
+              chapter.lessonTitle,
+              style: TextStyle(
+                fontSize: 14,
+              ),
+            ),
+            children: [
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: chapter.lessonList.length,
+                itemBuilder: (context, lessonIndex) {
+                  var lesson = chapter.lessonList[lessonIndex];
+                  return ListTile(
+                    title: Text(
+                      lesson.lessonTitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                    onTap: () {
+                      // Handle onTap for lesson
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+        ],
+      );
+    }).toList();
   }
 
-  Widget generateComponent(String inputText, int courseIndex, int lessonIndex) {
+  /*Widget generateComponent(String inputText, int courseIndex, int lessonIndex) {
     bool _isPressed = false;
     String selectedLessonName = _selectedLessonIndex != -1
         ? _courses[courseIndex]
@@ -708,7 +763,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
           inputText,
         );
     }
-  }
+  }*/
 
   void showPopupMenuPOP(
       BuildContext context, Offset offset, RenderBox button, int courseIndex) {

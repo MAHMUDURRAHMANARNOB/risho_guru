@@ -86,6 +86,7 @@ class ApiService {
       body: {'userid': userId.toString()},
       /*headers: {'Content-Type': 'application/json'},*/
     );
+    print("Response $response");
 
     if (response.statusCode == 200) {
       print(SubscriptionStatusResponse.fromJson(jsonDecode(response.body)));
@@ -98,51 +99,29 @@ class ApiService {
   /*Subscribed COURSES*/
   Future<List<Course>> fetchSubscribedCourses(int userId) async {
     const apiUrl = '$baseUrl/getsubscribedcourse/';
+    print("apiUrl: " + apiUrl);
     final Uri uri = Uri.parse(apiUrl);
 
     final response = await http.post(
       uri,
       body: {'userid': userId.toString()},
     );
-    print("response: " + json.decode(response.body));
 
     if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      print('API Response fetchSubscribedCourses: $jsonData');
-      final courses = (jsonData['courseinfo'] as List)
-          .map((courseJson) => Course.fromJson(courseJson))
-          .toList();
+      final dynamic coursesresponseData = json.decode(response.body);
+      print('API Response fetchSubscribedCourses: $coursesresponseData');
+      final message = (coursesresponseData["message"]);
+      print('message: $message');
+      final List<dynamic> courses = coursesresponseData['courseinfo'];
       // Print the courses for debugging
       print('Parsed Courses: $courses');
 
-      return courses;
+      final List<Course> parsedCourses =
+          courses.map((data) => Course.fromJson(data)).toList();
+
+      return parsedCourses;
     } else {
       throw Exception('Failed to load data');
     }
   }
-
-  /*Subscribed COURSES*/
-  /*static Future<List<Course>> fetchSubscribedCourses(
-    int userId,
-  ) async {
-    const apiUrl = '$baseUrl/getsubscribedcourse/';
-    final Uri uri = Uri.parse(apiUrl);
-
-    final response = await http.post(
-      uri,
-      body: {'userid': userId.toString()},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      List<Course> courses =
-          data.map((courseJson) => Course.fromJson(courseJson)).toList();
-      return courses;
-      */ /*final Map<String, dynamic> json = jsonDecode(response.body);
-      return SubscribedCoursesResponse.fromJson(json);*/ /*
-      */ /*SubscribedCoursesResponse.fromJson(jsonDecode(response.body));*/ /*
-    } else {
-      throw Exception('Failed to load subscribed courses');
-    }
-  }*/
 }

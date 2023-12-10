@@ -100,7 +100,7 @@ class Course {
   final int courseId;
   final String courseName;
   final String courseDescription;
-  final List<Chapter> chapters;
+  final List<Chapters> chapters;
 
   Course({
     required this.courseId,
@@ -109,10 +109,10 @@ class Course {
     required this.chapters,
   });
   factory Course.fromJson(Map<String, dynamic> json) {
-    List<Chapter> chapters = [];
+    List<Chapters> chapters = [];
     if (json['Chapters'] != null) {
       chapters = (json['Chapters'] as List)
-          .map((chapterJson) => Chapter.fromJson(chapterJson))
+          .map((chapterJson) => Chapters.fromJson(chapterJson))
           .toList();
     }
 
@@ -125,7 +125,7 @@ class Course {
   }
 }
 
-class Chapter {
+class Chapters {
   final int lessonId;
   final int courseId;
   final String lessonTitle;
@@ -133,9 +133,9 @@ class Chapter {
   final int seqNo;
   final String isActive;
   final int chapterIndex;
-  final List<Lesson> lessonList;
+  final List<lessonlist> lessonList;
 
-  Chapter({
+  Chapters({
     required this.lessonId,
     required this.courseId,
     required this.lessonTitle,
@@ -145,15 +145,15 @@ class Chapter {
     required this.chapterIndex,
     required this.lessonList,
   });
-  factory Chapter.fromJson(Map<String, dynamic> json) {
-    List<Lesson> lessonList = [];
+  factory Chapters.fromJson(Map<String, dynamic> json) {
+    List<lessonlist> lessonList = [];
     if (json['lessonlist'] != null) {
       lessonList = (json['lessonlist'] as List)
-          .map((lessonJson) => Lesson.fromJson(lessonJson))
+          .map((lessonJson) => lessonlist.fromJson(lessonJson))
           .toList();
     }
 
-    return Chapter(
+    return Chapters(
       lessonId: json['lessonid'],
       courseId: json['Courseid'],
       lessonTitle: json['Lessontitle'],
@@ -166,7 +166,7 @@ class Chapter {
   }
 }
 
-class Lesson {
+class lessonlist {
   final int lessonId;
   final int courseId;
   final String lessonTitle;
@@ -175,7 +175,7 @@ class Lesson {
   final String isActive;
   final int chapterIndex;
 
-  Lesson({
+  lessonlist({
     required this.lessonId,
     required this.courseId,
     required this.lessonTitle,
@@ -184,8 +184,8 @@ class Lesson {
     required this.isActive,
     required this.chapterIndex,
   });
-  factory Lesson.fromJson(Map<String, dynamic> json) {
-    return Lesson(
+  factory lessonlist.fromJson(Map<String, dynamic> json) {
+    return lessonlist(
       lessonId: json['lessonid'],
       courseId: json['Courseid'],
       lessonTitle: json['Lessontitle'],

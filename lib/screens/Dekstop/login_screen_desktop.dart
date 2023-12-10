@@ -21,18 +21,16 @@ class _LoginScreenDesktopState extends State<LoginScreenDesktop> {
         children: [
           Expanded(
             child: Container(
-              margin: EdgeInsets.all(16.0),
-              padding: EdgeInsets.all(1.0),
-              decoration: BoxDecoration(
+              height: double.infinity,
+              /*margin: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(1.0),*/
+              /*decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
                 color: AppColors.secondaryColor,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Image.asset(
-                  'assets/images/login.png', // Replace with the path to your image
-                  fit: BoxFit.cover,
-                ),
+              ),*/
+              child: Image.asset(
+                'assets/images/login.png', // Replace with the path to your image
+                fit: BoxFit.cover,
               ),
               /*decoration: BoxDecoration(
                 border: Border.all(
