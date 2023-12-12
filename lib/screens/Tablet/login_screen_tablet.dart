@@ -22,15 +22,13 @@ class _LoginScreenTabletState extends State<LoginScreenTablet> {
           Expanded(
             child: Container(
               height: double.infinity,
-              /*margin: EdgeInsets.all(16.0),
-              padding: EdgeInsets.all(1.0),*/
-              /*decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                color: AppColors.secondaryColor,
-              ),*/
-              child: Image.asset(
-                'assets/images/login.png', // Replace with the path to your image
-                fit: BoxFit.cover,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: const AssetImage('assets/images/login.png'),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.2), BlendMode.darken),
+                ),
               ),
             ),
           ),

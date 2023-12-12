@@ -96,7 +96,7 @@ class ApiService {
     }
   }
 
-  /*Subscribed COURSES*/
+  /*SUBSCRIBED COURSES*/
   Future<List<Course>> fetchSubscribedCourses(int userId) async {
     const apiUrl = '$baseUrl/getsubscribedcourse/';
     print("apiUrl: " + apiUrl);
@@ -122,6 +122,59 @@ class ApiService {
       return parsedCourses;
     } else {
       throw Exception('Failed to load data');
+    }
+  }
+
+  /*GET LESSON ANSWER*/
+  Future<Map<String, dynamic>> getLessonAnswer(
+      int lessonId, int courseId, int userId) async {
+    final url = '$baseUrl/getlessonanswer/';
+    print("Posting in api service $url, $lessonId, $courseId , $userId");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'lessonid': lessonId.toString(),
+          'courseid': courseId.toString(),
+          'userid': userId.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in api service " + response.body);
+        return json.decode(response.body);
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  /*Translation*/
+  Future<Map<String, dynamic>> getTranslation(int lessonanswerid) async {
+    final url = '$baseUrl/gettranslation/';
+    print("Posting in api service $url, $lessonanswerid");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'lessonanswerid': lessonanswerid.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in getTranslation " + response.body);
+        return json.decode(Utf8Decoder().convert(response.bodyBytes));
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception(e);
     }
   }
 }

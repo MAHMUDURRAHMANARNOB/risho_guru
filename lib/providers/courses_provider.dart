@@ -5,14 +5,11 @@ import '../models/course.dart';
 
 class CourseProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
-  int userId = 59317;
   List<Course>? _courses;
   List<Course>? get courses => _courses;
 
-  CourseProvider({required this.userId});
-
   // Add a method to fetch courses from your API
-  Future<List<Course>> fetchCourses() async {
+  Future<List<Course>> fetchCourses(int userId) async {
     try {
       /*userId = 1;*/
       _courses = await _apiService.fetchSubscribedCourses(59317);

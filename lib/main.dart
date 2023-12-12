@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:risho_guru/providers/auth_provider.dart';
 import 'package:risho_guru/providers/courses_provider.dart';
+import 'package:risho_guru/providers/getLessonAnswer_Provider.dart';
+import 'package:risho_guru/providers/getTaslation_provider.dart';
 import 'package:risho_guru/providers/subscriptionStatus_provider.dart';
 import 'package:risho_guru/providers/tools_provider.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
@@ -24,7 +26,13 @@ void main() {
         ChangeNotifierProvider(create: (context) => ToolsProvider(userId: 0)),
         ChangeNotifierProvider(
             create: (context) => SubscriptionStatusProvider(userId: 0)),
-        ChangeNotifierProvider(create: (context) => CourseProvider(userId: 0)),
+        ChangeNotifierProvider(create: (context) => CourseProvider()),
+        ChangeNotifierProvider(
+          create: (context) => LessonAnswerProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => TranslationProvider(),
+        ),
       ],
       child: RishoGuru(),
     ),

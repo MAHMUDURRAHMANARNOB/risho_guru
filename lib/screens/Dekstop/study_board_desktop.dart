@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:html/parser.dart';
+import 'package:risho_guru/providers/getTaslation_provider.dart';
+/*import 'package:markdown/markdown.dart' as md;*/
 import 'package:risho_guru/ui/colors.dart';
 import 'package:provider/provider.dart';
 import '../../models/course.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/courses_provider.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import '../../providers/getLessonAnswer_Provider.dart';
 
 class StudyBoardDesktop extends StatefulWidget {
   const StudyBoardDesktop({Key? key}) : super(key: key);
@@ -20,24 +26,21 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
   late List<Course>? _courses = [];
   late List<List<int>> _selectedIndices;
 
+  int _selectedLessonIndex = -1;
+  int courseIndex = -1;
+  int selectedCourseId = 0;
+  int selectedLessonId = 0;
+  int userid = 0;
+  List<String> _lessonContents = [];
+  List<Widget> _lessonComponents = [];
+  bool isListViewVisible = false; // Add this variable
+
   @override
   void initState() {
     super.initState();
     // Assuming you have a method to fetch courses, replace this with your actual logic
-    /*Provider.of<CourseProvider>(context, listen: false);
-    */ /*_courses = fetchCourses();*/ /*
-    _courses = context.watch<CourseProvider>().courses;
-    _selectedIndices = List.generate(_courses!.length, (index) => []);*/
     _selectedIndices = List.generate(_courses!.length, (index) => []);
   }
-
-  /*@override
-  void initState() {
-    super.initState();
-    _selectedIndices = List.generate(courses.length, (index) => []);
-  }*/
-
-  int _selectedLessonIndex = -1;
 
   void togglePressed() {
     setState(() {
@@ -46,113 +49,13 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     });
   }
 
-  /*List<Course> _courses = [
-    Course(
-      courseName: 'English for Today - Class 1',
-      courseId: 1,
-      chapters: [
-        Chapter(
-          lessonId: 67,
-          courseId: 1,
-          lessonTitle: 'abcx',
-          isChapter: 'Y',
-          seqNo: 1,
-          isActive: '1',
-          chapterIndex: 1,
-          lessonList: [
-            Lesson(
-              lessonId: 71,
-              courseId: 1,
-              lessonTitle: 'second row',
-              isChapter: 'N',
-              seqNo: 2,
-              isActive: '1',
-              chapterIndex: 1,
-            ),
-          ],
-        ),
-        Chapter(
-          lessonId: 68,
-          courseId: 1,
-          lessonTitle: 'avcx',
-          isChapter: 'Y',
-          seqNo: 3,
-          isActive: '1',
-          chapterIndex: 2,
-          lessonList: [
-            Lesson(
-              lessonId: 69,
-              courseId: 1,
-              lessonTitle: 'nnnx',
-              isChapter: 'N',
-              seqNo: 4,
-              isActive: '1',
-              chapterIndex: 2,
-            ),
-          ],
-        ),
-      ],
-      courseDescription: '',
-    ),
-    Course(
-      courseName: 'English for Today - Class 1',
-      courseId: 2,
-      chapters: [
-        Chapter(
-          lessonId: 67,
-          courseId: 1,
-          lessonTitle: 'abcx',
-          isChapter: 'Y',
-          seqNo: 1,
-          isActive: '1',
-          chapterIndex: 1,
-          lessonList: [
-            Lesson(
-              lessonId: 71,
-              courseId: 1,
-              lessonTitle: 'second row',
-              isChapter: 'N',
-              seqNo: 2,
-              isActive: '1',
-              chapterIndex: 1,
-            ),
-          ],
-        ),
-        Chapter(
-          lessonId: 68,
-          courseId: 1,
-          lessonTitle: 'avcx',
-          isChapter: 'Y',
-          seqNo: 3,
-          isActive: '1',
-          chapterIndex: 2,
-          lessonList: [
-            Lesson(
-              lessonId: 69,
-              courseId: 1,
-              lessonTitle: 'nnnx',
-              isChapter: 'N',
-              seqNo: 4,
-              isActive: '1',
-              chapterIndex: 2,
-            ),
-          ],
-        ),
-      ],
-      courseDescription: '',
-    ),
-  ];*/
-  late int courseIndex;
-
-  List<String> _lessonContents = [];
-  List<Widget> _lessonComponents = [];
-  bool isListViewVisible = false; // Add this variable
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    userid = authProvider.user?.id ?? 0;
     /*final courseProvider = CourseProvider(userId: authProvider.user?.id ?? 0);*/
     final courseProvider = context.read<CourseProvider>();
+    final translationProvider = context.read<TranslationProvider>();
 
     _courses = courseProvider.courses ?? [];
 
@@ -235,15 +138,16 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                         margin: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
                         child: Center(
                           child: FutureBuilder<List<Course>>(
-                            future:
-                                context.read<CourseProvider>().fetchCourses(),
+                            future: context
+                                .read<CourseProvider>()
+                                .fetchCourses(userid),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
                                 return CircularProgressIndicator();
                               } else if (snapshot.hasError ||
                                   snapshot.data == null) {
-                                return Text('Error: ${snapshot.error}');
+                                return Text('ErrorSNAPSHOT: ${snapshot.error}');
                               } else {
                                 final courses = snapshot.data ?? [];
                                 if (courses.isEmpty) {
@@ -255,6 +159,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                   itemCount: courses.length,
                                   itemBuilder: (context, courseIndex) {
                                     var course = courses[courseIndex];
+                                    selectedCourseId = course.courseId;
                                     return Container(
                                       margin: EdgeInsets.all(2.0),
                                       decoration: BoxDecoration(
@@ -264,16 +169,12 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                       child: ExpansionTile(
                                         title: Text(
                                           course.courseName,
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 14,
                                           ),
                                         ),
-                                        /*textColor: _selectedIndices[courseIndex]
-                                                .isNotEmpty
-                                            ? AppColors.primaryColor
-                                            : Colors.white,*/
-                                        children: _buildLessonList(
-                                            courseIndex, course.chapters),
+                                        children: _buildLessonList(courseIndex,
+                                            course.chapters, selectedCourseId),
                                       ),
                                     );
                                   },
@@ -303,7 +204,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'Recommended',
                             style: TextStyle(
                               color: Colors.white,
@@ -360,7 +261,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                           maxLines: 3,
                           minLines: 1,
                           cursorColor: AppColors.primaryColor,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Type your message...',
                             border: OutlineInputBorder(),
                             focusedBorder: OutlineInputBorder(
@@ -387,8 +288,12 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                           setState(() {
                             _lessonContents
                                 .add('$inputText : ${DateTime.now()}');
-                            /*_lessonComponents.add(generateComponent(
-                                inputText, courseIndex, _selectedLessonIndex));*/
+                            _lessonComponents.add(generateComponent(
+                                userid,
+                                inputText,
+                                selectedCourseId,
+                                _selectedLessonIndex,
+                                selectedLessonId));
                           });
                         },
                         child: const Icon(
@@ -408,103 +313,10 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
-  /*Widget _buildLessonList(
-      int courseIndex, List<String> lessons, int chapterIndex) {
-    print("Course Index: $courseIndex");
-    print("Selected Lesson Index: $_selectedLessonIndex");
-    return Column(
-      children: lessons
-          .asMap()
-          .entries
-          .map((entry) => ListTile(
-                title: Text(
-                  "> " + entry.value,
-                  style: TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
-                selected: _selectedIndices[courseIndex].contains(entry.key),
-                onTap: () {
-                  setState(() {
-                    _selectedIndices[courseIndex].clear();
-                    // _selectedIndex = courseIndex;
-                    _selectedLessonIndex = entry.key;
-                    if (_selectedIndices[courseIndex].contains(entry.key)) {
-                      _selectedIndices[courseIndex].remove(entry.key);
-                      _lessonContents.remove(entry.value);
-                    } else {
-                      _selectedIndices[courseIndex].add(entry.key);
-                      _lessonContents.add(entry.value);
-                    }
-                  });
-                },
-              ))
-          .toList(),
-    );
-  }*/
-  /*List<Widget> _buildLessonList(int courseIndex, List<Lesson> lessons) {
-    print("Course Index: $courseIndex");
-    print("Selected Lesson Index: $_selectedLessonIndex");
-    return lessons
-        .map((lesson) => ListTile(
-              title: Text(
-                "> " + lesson.lessonTitle,
-                style: TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-              selected: _selectedIndices[courseIndex]
-                  .contains(lessons.indexOf(lesson)),
-              onTap: () {
-                setState(() {
-                  _selectedIndices[courseIndex].clear();
-                  _selectedLessonIndex = lessons.indexOf(lesson);
-                  if (_selectedIndices[courseIndex]
-                      .contains(lessons.indexOf(lesson))) {
-                    _selectedIndices[courseIndex]
-                        .remove(lessons.indexOf(lesson));
-                    _lessonContents.remove(lesson.lessonTitle);
-                  } else {
-                    _selectedIndices[courseIndex].add(lessons.indexOf(lesson));
-                    _lessonContents.add(lesson.lessonTitle);
-                  }
-                });
-              },
-            ))
-        .toList();
-  }*/
-  /*List<Widget> _buildLessonList(int courseIndex, List<Lesson> lessons) {
-    return lessons.map((lesson) {
-      return ListTile(
-        title: Text(
-          "> " + lesson.lessonTitle,
-          style: TextStyle(
-            fontSize: 14,
-          ),
-        ),
-        selected:
-            _selectedIndices[courseIndex].contains(lessons.indexOf(lesson)),
-        onTap: () {
-          setState(() {
-            _selectedLessonIndex = lessons.indexOf(lesson);
-            _selectedIndices[courseIndex].clear();
-            if (_selectedIndices[courseIndex]
-                .contains(lessons.indexOf(lesson))) {
-              _selectedIndices[courseIndex].remove(lessons.indexOf(lesson));
-              _lessonContents.remove(lesson.lessonTitle);
-            } else {
-              _selectedIndices[courseIndex].add(lessons.indexOf(lesson));
-              _lessonContents.add(lesson.lessonTitle);
-            }
-          });
-        },
-      );
-    }).toList();
-  }*/
-
-  List<Widget> _buildLessonList(int courseIndex, List<Chapters> chapters) {
-    print("Course Index: $courseIndex");
-    print("Number of chapters: ${chapters.length}");
+  List<Widget> _buildLessonList(
+      int courseIndex, List<Chapters> chapters, int selectedCourseId) {
+    /*print("Course Index: $courseIndex");
+    print("Number of chapters: ${chapters.length}");*/
     return chapters.map((chapter) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -512,26 +324,43 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
           ExpansionTile(
             title: Text(
               chapter.lessonTitle,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
               ),
             ),
             children: [
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: chapter.lessonList.length,
                 itemBuilder: (context, lessonIndex) {
                   var lesson = chapter.lessonList[lessonIndex];
+                  bool isSelected = lessonIndex == _selectedLessonIndex;
                   return ListTile(
                     title: Text(
                       lesson.lessonTitle,
                       style: TextStyle(
                         fontSize: 14,
+                        color:
+                            isSelected ? AppColors.primaryColor : Colors.white,
                       ),
                     ),
                     onTap: () {
                       // Handle onTap for lesson
+                      setState(() {
+                        selectedLessonId = lesson.lessonId;
+                        _selectedLessonIndex = lessonIndex;
+                        _lessonComponents.add(generateComponentGettingAnswer(
+                          userid,
+                          selectedCourseId,
+                          _selectedLessonIndex,
+                          selectedLessonId,
+                        ));
+                      });
+
+                      /*int selectedCourseId = course.courseId;*/
+                      print(
+                          'Selected Lesson ID: $selectedLessonId, Course ID: $selectedCourseId');
                     },
                   );
                 },
@@ -544,231 +373,333 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     }).toList();
   }
 
-  /*Widget generateComponent(String inputText, int courseIndex, int lessonIndex) {
+  Widget generateComponentGettingAnswer(
+      int userid, int courseId, int lessonIndex, int lessonId) {
     bool _isPressed = false;
-    String selectedLessonName = _selectedLessonIndex != -1
-        ? _courses[courseIndex]
-            .chapters
-            .expand((chapter) => chapter.lessonList)
-            .toList()[_selectedLessonIndex]
-            .lessonTitle
-        : '';
-    switch (inputText.toLowerCase()) {
-      case 'image':
-        // Replace 'ImageWidget' with the actual widget you want to display for images
-        return Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    selectedLessonName.isNotEmpty
-                        ? 'Selected Lesson: $selectedLessonName'
-                        : 'No Lesson Selected',
-                  ),
-                  Text(
-                    inputText,
-                  ),
-                  Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          margin: EdgeInsets.all(2),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.thumb_up_outlined,
-                              color: AppColors.secondaryColor,
-                              size: 14,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          margin: EdgeInsets.all(2),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.audiotrack_outlined,
-                              color: AppColors.secondaryColor,
-                              size: 14,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          margin: EdgeInsets.all(2),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.question_answer_outlined,
-                              color: AppColors.secondaryColor,
-                              size: 14,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.more_horiz,
-                            color: AppColors.secondaryColor,
-                          ),
-                          onPressed: () {
-                            // Implement your logic to show a popup menu here
-                            // For example, use a PopupMenuButton
-                            setState(() {
-                              showPopupMenuPOP(
-                                  context,
-                                  const Offset(0, 40),
-                                  context.findRenderObject() as RenderBox,
-                                  courseIndex);
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                margin: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[800],
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Image.network(
-                  "https://cdn.pixabay.com/photo/2014/09/05/18/32/old-books-436498_1280.jpg",
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ],
-          ),
-        );
-      case 'text':
-        // Replace 'TextWidget' with the actual widget you want to display for text
-        return Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    inputText,
-                  ),
-                  Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          margin: EdgeInsets.all(2),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.thumb_up_outlined,
-                              color: AppColors.secondaryColor,
-                              size: 14,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          margin: EdgeInsets.all(2),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.audiotrack_outlined,
-                              color: AppColors.secondaryColor,
-                              size: 14,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          margin: EdgeInsets.all(2),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.question_answer_outlined,
-                              color: AppColors.secondaryColor,
-                              size: 14,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.more_horiz,
-                            color: AppColors.secondaryColor,
-                          ),
-                          onPressed: () {
-                            // Implement your logic to show a popup menu here
-                            // For example, use a PopupMenuButton
-                            setState(() {
-                              showPopupMenuPOP(
-                                  context,
-                                  const Offset(0, 40),
-                                  context.findRenderObject() as RenderBox,
-                                  courseIndex);
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                margin: const EdgeInsets.all(10.0),
-                padding: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[800],
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: const Text(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Auctor eu augue ut lectus arcu bibendum at varius. Fringilla est ullamcorper eget nulla facilisi. Amet nisl suscipit adipiscing bibendum est ultricies integer. Sed lectus vestibulum mattis ullamcorper velit. Hendrerit dolor magna eget est lorem ipsum dolor. Eget egestas purus viverra accumsan in. At quis risus sed vulputate odio ut. In aliquam sem fringilla ut morbi tincidunt augue interdum velit. Mi ipsum faucibus vitae aliquet nec. Leo in vitae turpis massa sed elementum tempus egestas. Id neque aliquam vestibulum morbi. Scelerisque eleifend donec pretium vulputate sapien nec sagittis. Dictumst quisque sagittis purus sit amet. Ipsum dolor sit amet consectetur adipiscing elit ut. Magna sit amet purus gravida quis blandit. Arcu bibendum at varius vel. Nunc sed augue lacus viverra vitae congue.Mauris nunc congue nisi vitae. Convallis convallis tellus id interdum velit laoreet id. Faucibus et molestie ac feugiat sed lectus. Consequat interdum varius sit amet mattis. Pharetra diam sit amet nisl suscipit. Ut aliquam purus sit amet. Pharetra diam sit amet nisl. Scelerisque viverra mauris in aliquam sem. In fermentum et sollicitudin ac orci. Duis convallis convallis tellus id interdum velit. Feugiat in ante metus dictum at tempor. Congue quisque egestas diam in arcu cursus euismod quis. Convallis aenean et tortor at risus viverra adipiscing. Elementum curabitur vitae nunc sed. Nunc sed velit dignissim sodales ut eu sem integer vitae. Diam donec adipiscing tristique risus nec feugiat. Facilisis sed odio morbi quis commodo odio aenean sed. Ornare arcu odio ut sem nulla pharetra diam. Nisl pretium fusce id velit ut.Enim tortor at auctor urna nunc id cursus metus aliquam. Aliquam ut porttitor leo a diam. Velit scelerisque in dictum non consectetur. Diam sollicitudin tempor id eu nisl nunc mi ipsum. Dignissim suspendisse in est ante in nibh mauris. Morbi blandit cursus risus at ultrices mi tempus imperdiet nulla. Quisque non tellus orci ac auctor augue. Eu tincidunt tortor aliquam nulla. Faucibus nisl tincidunt eget nullam non nisi. Amet consectetur adipiscing elit ut aliquam. Ipsum a arcu cursus vitae congue mauris rhoncus. Aenean et tortor at risus. Semper viverra nam libero justo laoreet sit amet cursus sit. Felis bibendum ut tristique et egestas quis ipsum suspendisse."),
-              ),
-            ],
-          ),
-        );
 
-      default:
-        // Replace 'DefaultWidget' with the default widget you want to display
-        return Text(
-          inputText,
-        );
-    }
-  }*/
+    final lessonProvider =
+        Provider.of<LessonAnswerProvider>(context, listen: false);
+    return FutureBuilder<void>(
+      future: lessonProvider.fetchLessonData(lessonId, courseId, userid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // Loading state
+        } else if (snapshot.hasError) {
+          return Text('ErrorSnapshotFutureBuilder: ${snapshot.error}');
+        } else {
+          final ansType =
+              lessonProvider.lessonModel?.lessonAnswer.ansType.toString();
+          print(
+              'Selected course: $courseId \n Selected lesson: $lessonId \n userid: $userid \n ANSTYPE: $ansType');
+
+          switch (ansType) {
+            case "T":
+              // Your 'T' case code
+              final lessonAnswer = lessonProvider.lessonModel!.lessonAnswer;
+              print(lessonAnswer.textAns);
+              final ansId = lessonAnswer.answerId;
+              return Container(
+                // Your 'T' case UI code
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /*Top Part*/
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "$lessonId -- $courseId",
+                        ),
+                        Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                margin: EdgeInsets.all(2),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.thumb_up_outlined,
+                                    color: AppColors.secondaryColor,
+                                    size: 14,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _lessonComponents.add(
+                                        generateNewComponentforAnswer(ansId),
+                                      );
+                                    });
+                                  },
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                margin: EdgeInsets.all(2),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.volume_up_outlined,
+                                    color: AppColors.secondaryColor,
+                                    size: 16,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                margin: EdgeInsets.all(2),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.question_answer_outlined,
+                                    color: AppColors.secondaryColor,
+                                    size: 14,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.more_horiz,
+                                  color: AppColors.secondaryColor,
+                                ),
+                                onPressed: () {
+                                  // Implement your logic to show a popup menu here
+                                  // For example, use a PopupMenuButton
+                                  setState(() {
+                                    showPopupMenuPOP(
+                                        context,
+                                        const Offset(0, 40),
+                                        context.findRenderObject() as RenderBox,
+                                        courseIndex);
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SingleChildScrollView(
+                      child: Container(
+                        margin: const EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(10.0),
+                        height: 400,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Markdown(
+                          data: lessonAnswer.textAns.toString(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            default:
+              // Your default case code
+              return Text("No Text Available");
+          }
+        }
+      },
+    );
+  }
+
+  Widget generateNewComponentforAnswer(int lessonAnsId) {
+    bool _isPressed = false;
+
+    final translationProvider =
+        Provider.of<TranslationProvider>(context, listen: false);
+    return FutureBuilder<void>(
+      future: translationProvider.fetchTranslationData(lessonAnsId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // Loading state
+        } else if (snapshot.hasError) {
+          return Text('ErrorSnapshotFutureBuilder: ${snapshot.error}');
+        } else {
+          final traslation =
+              translationProvider.translationModel?.traslation.TextAnsBn;
+
+          print(traslation);
+          return Container(
+            // Your 'T' case UI code
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /*Top Part*/
+                SingleChildScrollView(
+                  child: Container(
+                    margin: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(10.0),
+                    height: 400,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[800],
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Markdown(
+                      data: traslation.toString(),
+                    ),
+                    /*Text(
+                      traslation.toString(),
+                      style: TextStyle(
+                        fontFamily: 'Sutonnoy',
+                      ),
+                    ),*/
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget generateComponent(int userid, String inputText, int courseId,
+      int lessonIndex, int lessonId) {
+    bool _isPressed = false;
+
+    final lessonProvider =
+        Provider.of<LessonAnswerProvider>(context, listen: false);
+    return FutureBuilder<void>(
+      future: lessonProvider.fetchLessonData(lessonId, courseId, userid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Loading state
+        } else if (snapshot.hasError) {
+          return Text('ErrorSnapshotFutureBuilder: ${snapshot.error}');
+        } else {
+          final ansType = lessonProvider.lessonModel?.lessonAnswer.ansType;
+          print(
+              'Selected course: $courseId \n Selected lesson: $lessonId \n userid: $userid \n ANSTYPE: $ansType');
+
+          switch (ansType) {
+            case 'T':
+              // Your 'T' case code
+              final lessonAnswer = lessonProvider.lessonModel!.lessonAnswer;
+              return Container(
+                // Your 'T' case UI code
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "$lessonId -- $courseId",
+                        ),
+                        Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                margin: EdgeInsets.all(2),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.thumb_up_outlined,
+                                    color: AppColors.secondaryColor,
+                                    size: 14,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                margin: EdgeInsets.all(2),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.audiotrack_outlined,
+                                    color: AppColors.secondaryColor,
+                                    size: 14,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                margin: EdgeInsets.all(2),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.question_answer_outlined,
+                                    color: AppColors.secondaryColor,
+                                    size: 14,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.more_horiz,
+                                  color: AppColors.secondaryColor,
+                                ),
+                                onPressed: () {
+                                  // Implement your logic to show a popup menu here
+                                  // For example, use a PopupMenuButton
+                                  setState(() {
+                                    showPopupMenuPOP(
+                                        context,
+                                        const Offset(0, 40),
+                                        context.findRenderObject() as RenderBox,
+                                        courseIndex);
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          inputText,
+                        ),
+                        Container(
+                          margin: const EdgeInsets.all(10.0),
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[800],
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child:
+                              Text(lessonAnswer.textAns ?? 'No Text Available'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            default:
+              // Your default case code
+              return Text(inputText);
+          }
+        }
+      },
+    );
+  }
 
   void showPopupMenuPOP(
       BuildContext context, Offset offset, RenderBox button, int courseIndex) {
     final RenderBox overlay =
-        Overlay.of(context)!.context.findRenderObject() as RenderBox;
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),

@@ -22,22 +22,14 @@ class _LoginScreenDesktopState extends State<LoginScreenDesktop> {
           Expanded(
             child: Container(
               height: double.infinity,
-              /*margin: EdgeInsets.all(16.0),
-              padding: EdgeInsets.all(1.0),*/
-              /*decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                color: AppColors.secondaryColor,
-              ),*/
-              child: Image.asset(
-                'assets/images/login.png', // Replace with the path to your image
-                fit: BoxFit.cover,
-              ),
-              /*decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.white, // Border color
-                  width: 2.0, // Border width
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: const AssetImage('assets/images/login.png'),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.2), BlendMode.darken),
                 ),
-              ),*/
+              ),
             ),
           ),
           Expanded(
