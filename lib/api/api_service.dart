@@ -177,4 +177,86 @@ class ApiService {
       throw Exception(e);
     }
   }
+
+  /*TAKE EXAM*/
+  Future<Map<String, dynamic>> getMCQExamQuestions(
+      int lessonid, String requestfor) async {
+    final url = '$baseUrl/getmcqquestions/';
+    print("Posting in api service $url, $lessonid");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'lessonorvideoid': lessonid.toString(),
+          'requestfor  ': requestfor.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in getMCQExamQuestions " + response.body);
+        return json.decode(response.body);
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  /*Essay Question*/
+  Future<Map<String, dynamic>> getEssayQuestions(int lessonid) async {
+    final url = '$baseUrl/getessayquestion/';
+    print("Posting in api service $url, $lessonid");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'lessonid': lessonid.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in getEssayQuestions " + response.body);
+        return json.decode(response.body);
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  /*Submit Reaction*/
+  Future<Map<String, dynamic>> getSubmitReaction(int userid, int reactingid,
+      String reactiontype, String reactionfor) async {
+    final url = '$baseUrl/submitreaction/';
+    print(
+        "Posting in api service $url, $userid, $reactingid, $reactiontype, $reactionfor");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'vuserid': userid.toString(),
+          'reactingid': reactingid.toString(),
+          'reactiontype': reactiontype.toString(),
+          'reactionfor': reactionfor.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in getSubmitReaction " + response.body);
+        return json.decode(response.body);
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 }

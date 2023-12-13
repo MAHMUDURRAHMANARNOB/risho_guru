@@ -54,7 +54,7 @@ flutter:
         - asset: assets/fonts/Poppins.ttf
     - family: Smooch
       fonts:
-        - asset: assets/fonts/SmoochSans.ttf-
+        - asset: assets/fonts/SmoochSans.ttf
     - family: Sutonnoy
       fonts:
         - asset: assets/fonts/SutonnyMJ Regular.ttf

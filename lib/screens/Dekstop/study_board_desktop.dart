@@ -68,21 +68,41 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
         actions: [
           Container(
             margin: EdgeInsets.all(10.0),
-            child: ElevatedButton(
-              style: OutlinedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor),
-              onPressed: () {},
-              child: Row(
-                children: [
-                  Text("Earned Points: "),
-                  Text(
-                    "0",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
                   ),
-                ],
-              ),
+                  child: Icon(
+                    Icons.save_outlined,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                /*EARNED POINTS*/
+                ElevatedButton(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    padding: EdgeInsets.all(10.0),
+                  ),
+                  onPressed: () {},
+                  child: Row(
+                    children: [
+                      Text("Earned Points: "),
+                      Text(
+                        "0",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -229,6 +249,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
             flex: 8,
             child: Column(
               children: [
+                /*STUDY BOARD COMPONENTS LOADING PART*/
                 Expanded(
                   flex: 2,
                   child: Container(
@@ -251,6 +272,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     ),
                   ),
                 ),
+                /*QUESTION ASKING BOX*/
                 Container(
                   color: AppColors.backgroundColorDark,
                   padding: const EdgeInsets.all(16.0),
@@ -313,6 +335,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
+  /*CHAPTER AND LESSON LIST LOADER*/
   List<Widget> _buildLessonList(
       int courseIndex, List<Chapters> chapters, int selectedCourseId) {
     /*print("Course Index: $courseIndex");
@@ -373,6 +396,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     }).toList();
   }
 
+  /*LESSON ANSWER GENERATOR*/
   Widget generateComponentGettingAnswer(
       int userid, int courseId, int lessonIndex, int lessonId) {
     bool _isPressed = false;
@@ -430,7 +454,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                   onPressed: () {
                                     setState(() {
                                       _lessonComponents.add(
-                                        generateNewComponentforAnswer(ansId),
+                                        generateTranslationforAnswer(ansId),
                                       );
                                     });
                                   },
@@ -514,7 +538,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
-  Widget generateNewComponentforAnswer(int lessonAnsId) {
+  /*ANSWER TRANSLATION GENERATOR*/
+  Widget generateTranslationforAnswer(int lessonAnsId) {
     bool _isPressed = false;
 
     final translationProvider =
@@ -550,12 +575,6 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     child: Markdown(
                       data: traslation.toString(),
                     ),
-                    /*Text(
-                      traslation.toString(),
-                      style: TextStyle(
-                        fontFamily: 'Sutonnoy',
-                      ),
-                    ),*/
                   ),
                 ),
               ],
@@ -566,6 +585,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
+  /*COMPONENT GENERATOR TO LOAD ON THE LIST OF STUDY BOARD*/
   Widget generateComponent(int userid, String inputText, int courseId,
       int lessonIndex, int lessonId) {
     bool _isPressed = false;
@@ -696,6 +716,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
+  /*POPUP ON MORE CLICK ON COMPONENTS*/
   void showPopupMenuPOP(
       BuildContext context, Offset offset, RenderBox button, int courseIndex) {
     final RenderBox overlay =
@@ -820,6 +841,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     );
   }
 
+  /*POPUP MENU ITEMS*/
   void showPopupMenu(BuildContext context) {
     showDialog(
         context: context,
@@ -860,6 +882,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
         });
   }
 
+  /*COMMON MENU ITEMS*/
   Widget buildMenuItem(
       BuildContext context, String text, IconData icon, String value) {
     return GestureDetector(
