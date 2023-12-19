@@ -21,6 +21,7 @@ dependencies:
   html: ^0.15.4
   custom_button_builder: ^0.0.1
   flutter_hooks: ^0.20.3
+  animated_custom_dropdown: 1.5.0
 
 dev_dependencies:
   flutter_test:

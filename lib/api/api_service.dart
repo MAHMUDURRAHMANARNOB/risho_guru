@@ -259,4 +259,61 @@ class ApiService {
       throw Exception(e);
     }
   }
+
+  /*Tools Response*/
+  Future<Map<String, dynamic>> getToolsResponse(int userid, String questiontext,
+      String subject, String gradeclass, String toolscode) async {
+    final url = '$baseUrl/gettoolsresponse/';
+    print(
+        "Posting in api service $url, $userid, $questiontext, $subject, $gradeclass, $toolscode");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'userid': userid.toString(),
+          'questiontext': questiontext.toString(),
+          'subject': subject.toString(),
+          'gradeclass': gradeclass.toString(),
+          'toolscode': toolscode.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in getToolsResponse " + response.body);
+        return json.decode(response.body);
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data in getToolsResponse');
+      }
+    } catch (e) {
+      throw Exception("Failed getToolsResponse $e");
+    }
+  }
+
+  /*GET TOOLS DATA*/
+  Future<Map<String, dynamic>> getToolsData(int userid, int ToolsID) async {
+    final url = '$baseUrl/gettoolsdata/';
+    print("Posting in api service $url, $userid, $ToolsID");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'userid': userid.toString(),
+          'ToolsID': ToolsID.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in getToolsData " + response.body);
+        return json.decode(response.body);
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data in getToolsData');
+      }
+    } catch (e) {
+      throw Exception("Failed getToolsData $e");
+    }
+  }
 }

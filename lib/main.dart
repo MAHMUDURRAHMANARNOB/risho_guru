@@ -4,7 +4,9 @@ import 'package:risho_guru/providers/auth_provider.dart';
 import 'package:risho_guru/providers/courses_provider.dart';
 import 'package:risho_guru/providers/getLessonAnswer_Provider.dart';
 import 'package:risho_guru/providers/getTaslation_provider.dart';
+import 'package:risho_guru/providers/getToolsData_provider.dart';
 import 'package:risho_guru/providers/subscriptionStatus_provider.dart';
+import 'package:risho_guru/providers/toolsResponse_provider.dart';
 import 'package:risho_guru/providers/tools_provider.dart';
 import 'package:risho_guru/screens/courses_screen.dart';
 import 'package:risho_guru/screens/dashboard.dart';
@@ -32,6 +34,12 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (context) => TranslationProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ToolsDataProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ToolsResponseProvider(),
         ),
       ],
       child: RishoGuru(),

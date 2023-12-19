@@ -1,8 +1,12 @@
-import 'package:custom_button_builder/custom_button_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:custom_button_builder/custom_button_builder.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/getToolsData_DataModel.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/getToolsData_provider.dart';
+import '../../providers/toolsResponse_provider.dart';
 import '../../providers/tools_provider.dart';
 import '../../ui/colors.dart';
 
@@ -13,24 +17,42 @@ class ToolsScreenDesktop extends StatefulWidget {
   State<ToolsScreenDesktop> createState() => _ToolsScreenDesktopState();
 }
 
-List<String> _lessonContents = [];
 List<Widget> _lessonComponents = [];
+List<Widget> _toolsComponents = [];
 
-const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
+/*const List<String> list = <String>['One', 'Two', 'Three', 'Four'];*/
 
 class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
-  bool isSelected = false;
-  String dropdownValue = list.first;
+  String dropdownClassValue = "";
+  String dropdownSubjectValue = "";
+  TextEditingController questionTextFieldController = TextEditingController();
+  late ToolsDataProvider toolsDataProvider;
+  /*late ToolsResponseProvider toolsResponseProvider;*/
 
-  ElevatedButton buildToolButton(String toolName) {
+  bool isSelected = false;
+  /*String dropdownValue = list.first;*/
+
+  late String _selectedToolsCode;
+  late String _selectedClassName = '';
+  late String _selectedSubjectName = '';
+  late String _question = '';
+
+  ElevatedButton buildToolButton(
+    String toolName,
+    String toolsCode,
+    int toolId, {
+    required VoidCallback onToolSelected,
+  }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primaryColor,
       ),
       onPressed: () {
+        onToolSelected();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("$toolName Selected"),
+            content: Text(
+                "$toolName Selected >> $toolsCode << and tools id >> $toolId"),
             duration: Duration(seconds: 1),
           ),
         );
@@ -41,18 +63,16 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
 
   @override
   Widget build(BuildContext context) {
+    final jobRoleCtrl = TextEditingController();
     final authProvider = Provider.of<AuthProvider>(context);
     final toolsProvider = ToolsProvider(userId: authProvider.user?.id ?? 0);
-    print(toolsProvider.userId);
+    int userID = toolsProvider.userId;
+    print(userID);
     if (authProvider.user != null) {
       toolsProvider.userId = authProvider.user!.id;
       print('Setting userId for ToolsProvider: ${toolsProvider.userId}');
     }
-    String _className = 'Select';
-    String _subject = 'Select';
-    String _maxWord = '';
-    String _question = '';
-    String _answer = '';
+    toolsDataProvider = Provider.of<ToolsDataProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -83,7 +103,18 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                             width: double.infinity,
                             padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
                             height: 50,
-                            child: buildToolButton(tool.toolName),
+                            child: buildToolButton(
+                              tool.toolName,
+                              _selectedToolsCode = tool.toolsCode,
+                              tool.toolID,
+                              onToolSelected: () {
+                                // Call the API when a tool is selected
+                                toolsDataProvider.fetchToolsData(
+                                  userID, // replace with the actual user ID
+                                  tool.toolID,
+                                );
+                              },
+                            ),
                           );
                         }).toList(),
                       ),
@@ -99,6 +130,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
               margin: EdgeInsets.all(10),
               child: Column(
                 children: [
+                  /*TOOLS Components*/
                   Expanded(
                     flex: 2,
                     child: Container(
@@ -121,85 +153,214 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                       ),
                     ),
                   ),
-                  /*BOTTOM CONTROL*/
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.backgroundColorDark,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.backgroundColorDark,
-                          ),
-                          child: Icon(
-                            Icons.add_circle_outline,
-                            color: AppColors.primaryColor,
+                  /*BOTTOM CONTROL 1*/
+
+                  /*BOTTOM CONTROL 2*/
+                  Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(10),
+                        decoration: const BoxDecoration(
+                          color: AppColors.backgroundColorDark,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8),
                           ),
                         ),
-                        Expanded(
-                          child: TextField(
-                            maxLines: 3,
-                            minLines: 1,
-                            cursorColor: AppColors.primaryColor,
-                            decoration: InputDecoration(
-                              hintText: 'Type your message...',
-                              border: OutlineInputBorder(),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: AppColors.primaryColor,
+                        child: Row(
+                          children: [
+                            /*SELCTED CLASS*/
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              child: Row(
+                                children: [
+                                  Text("Class "),
+                                  DropdownMenu<String>(
+                                    onSelected: (String? value) {
+                                      // This is called when the user selects an item.
+                                      setState(() {
+                                        _selectedClassName = value!;
+                                        print(
+                                            "$_selectedClassName << Selectedclassname");
+                                      });
+                                    },
+                                    dropdownMenuEntries: toolsDataProvider
+                                            .toolsData?.classList
+                                            .map<DropdownMenuEntry<String>>(
+                                                (ClassInfo classInfo) {
+                                          return DropdownMenuEntry<String>(
+                                            value: classInfo.className,
+                                            label: classInfo.className,
+                                          );
+                                        }).toList() ??
+                                        [],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            /*SELECTED SUBJECT*/
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              child: Row(
+                                children: [
+                                  Text("Subject "),
+                                  DropdownMenu<String>(
+                                    onSelected: (String? value) {
+                                      // This is called when the user selects an item.
+                                      setState(() {
+                                        _selectedSubjectName = value!;
+                                        print(
+                                            "$_selectedSubjectName << _selectedSubjectName");
+                                      });
+                                    },
+                                    dropdownMenuEntries: toolsDataProvider
+                                            .toolsData?.subjectList
+                                            .map<DropdownMenuEntry<String>>(
+                                                (Subject subject) {
+                                          return DropdownMenuEntry<String>(
+                                            value: subject.subjectName,
+                                            label: subject.subjectName,
+                                          );
+                                        }).toList() ??
+                                        [],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(5),
+                                child: TextField(
+                                  maxLines: 3,
+                                  minLines: 1,
+                                  cursorColor: AppColors.primaryColor,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Max lines..',
+                                    border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                  onChanged: (value) {},
                                 ),
                               ),
                             ),
-                            onChanged: (value) {},
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundColorDark,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
                           ),
                         ),
-                        Container(
-                          child: Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      AppColors.backgroundColorDark,
-                                ),
-                                child: Icon(
-                                  Icons.image_rounded,
-                                  color: AppColors.primaryColor,
-                                ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            /*ADD DOCUMENT*/
+                            ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.backgroundColorDark,
                               ),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      AppColors.backgroundColorDark,
-                                ),
-                                child: Icon(
-                                  Icons.keyboard_rounded,
-                                  color: AppColors.primaryColor,
-                                ),
+                              child: Icon(
+                                Icons.add_circle_outline,
+                                color: AppColors.primaryColor,
                               ),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      AppColors.backgroundColorDark,
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: questionTextFieldController,
+                                maxLines: 3,
+                                minLines: 1,
+                                cursorColor: AppColors.primaryColor,
+                                decoration: InputDecoration(
+                                  hintText: 'Type your message...',
+                                  border: OutlineInputBorder(),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColors.primaryColor,
+                                    ),
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.send_rounded,
-                                  color: AppColors.primaryColor,
-                                ),
+                                onChanged: (value) {
+                                  _question = value;
+                                },
                               ),
-                            ],
-                          ),
+                            ),
+                            Container(
+                              child: Row(
+                                children: [
+                                  /*IMAGE PICKER*/
+                                  Visibility(
+                                    child: ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            AppColors.backgroundColorDark,
+                                      ),
+                                      child: const Icon(
+                                        Icons.image_rounded,
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                  /*MATH KEYBOARD*/
+                                  Visibility(
+                                    child: ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            AppColors.backgroundColorDark,
+                                      ),
+                                      child: Icon(
+                                        Icons.keyboard_rounded,
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                  /*SEND*/
+                                  Visibility(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _lessonComponents.add(
+                                            generateComponentGettingResponse(
+                                                context,
+                                                userID,
+                                                _question,
+                                                _selectedSubjectName,
+                                                _selectedClassName,
+                                                _selectedToolsCode),
+                                          );
+                                          // Clear the text in the TextField
+                                          questionTextFieldController.clear();
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            AppColors.backgroundColorDark,
+                                      ),
+                                      child: Icon(
+                                        Icons.send_rounded,
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   )
                 ],
               ),
@@ -209,6 +370,146 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
       ),
     );
   }
+}
+
+Widget generateComponentGettingResponse(
+    BuildContext context,
+    int userid,
+    String question,
+    String selectedSubject,
+    String selectedClass,
+    String selectedToolsCode) {
+  bool _isPressed = false;
+  final toolsResponseProvider =
+      Provider.of<ToolsResponseProvider>(context, listen: false);
+  return FutureBuilder<void>(
+    future: toolsResponseProvider.fetchToolsResponse(
+        userid, question, selectedSubject, selectedClass, selectedToolsCode),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const CircularProgressIndicator(); // Loading state
+      } else if (snapshot.hasError) {
+        return Text('ErrorSnapshotFutureBuilder: ${snapshot.error}');
+      } else {
+        /*final ansType =
+        toolsResponseProvider.lessonModel?.lessonAnswer.ansType.toString();*/
+        /*print(
+            'Selected course: $courseId \n Selected lesson: $lessonId \n userid: $userid \n ANSTYPE: $ansType');*/
+
+        // Your 'T' case code
+        final lessonAnswer = toolsResponseProvider.toolsResponse;
+        print(lessonAnswer!.answer.toString());
+        final ansId = lessonAnswer.ticketId.toString();
+        return Container(
+          // Your 'T' case UI code
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /*Top Part*/
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "$selectedClass -- $selectedSubject \n $question",
+                  ),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.thumb_up_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {
+                              /*setState(() {
+                                _lessonComponents.add(
+                                  generateTranslationforAnswer(ansId),
+                                );
+                              });*/
+                            },
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.volume_up_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 16,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.question_answer_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.more_horiz,
+                            color: AppColors.secondaryColor,
+                          ),
+                          onPressed: () {
+                            // Implement your logic to show a popup menu here
+                            // For example, use a PopupMenuButton
+                            /*setState(() {
+                              showPopupMenuPOP(
+                                  context,
+                                  const Offset(0, 40),
+                                  context.findRenderObject() as RenderBox,
+                                  courseIndex);
+                            });*/
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SingleChildScrollView(
+                child: Container(
+                  margin: const EdgeInsets.all(10.0),
+                  padding: const EdgeInsets.all(10.0),
+                  height: 400,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Markdown(
+                    data: lessonAnswer.answer.toString(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    },
+  );
 }
 
 final ButtonStyle flatButtonStyle = TextButton.styleFrom(
