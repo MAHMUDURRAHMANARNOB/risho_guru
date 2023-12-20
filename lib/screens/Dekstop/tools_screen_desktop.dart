@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:custom_button_builder/custom_button_builder.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,8 @@ import '../../providers/getToolsData_provider.dart';
 import '../../providers/toolsResponse_provider.dart';
 import '../../providers/tools_provider.dart';
 import '../../ui/colors.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 class ToolsScreenDesktop extends StatefulWidget {
   const ToolsScreenDesktop({super.key});
@@ -29,12 +32,19 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
   late ToolsDataProvider toolsDataProvider;
   /*late ToolsResponseProvider toolsResponseProvider;*/
 
+  File? _selectedImage;
+
+  /*final controller = CropController(
+    aspectRatio: 1,
+    defaultCrop: const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9),
+  );*/
+
   bool isSelected = false;
   /*String dropdownValue = list.first;*/
 
   late String _selectedToolsCode;
-  late String _selectedClassName = '';
-  late String _selectedSubjectName = '';
+  late String _selectedClassName = 'null';
+  late String _selectedSubjectName = 'null';
   late String _question = '';
 
   ElevatedButton buildToolButton(
@@ -49,6 +59,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
       ),
       onPressed: () {
         onToolSelected();
+        _selectedToolsCode = toolsCode;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -105,7 +116,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                             height: 50,
                             child: buildToolButton(
                               tool.toolName,
-                              _selectedToolsCode = tool.toolsCode,
+                              tool.toolsCode,
                               tool.toolID,
                               onToolSelected: () {
                                 // Call the API when a tool is selected
@@ -301,7 +312,9 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                   /*IMAGE PICKER*/
                                   Visibility(
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        _pickImage(context);
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             AppColors.backgroundColorDark,
@@ -368,6 +381,91 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _pickImage(BuildContext context) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+
+      _showSelectedImageDialog(context);
+    }
+  }
+
+  void _showCroppedImageDialog(BuildContext context, File croppedImage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Cropped Image'),
+          content: Image.file(croppedImage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _cropImage(File imageFile) async {
+    ImageCropper cropper = ImageCropper();
+    final croppedFile = await cropper.cropImage(
+      sourcePath: imageFile.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      compressQuality: 100,
+      maxWidth: 800,
+      maxHeight: 800,
+      androidUiSettings: AndroidUiSettings(
+        toolbarTitle: 'Crop Image',
+        toolbarColor: Colors.blue,
+        toolbarWidgetColor: Colors.white,
+        initAspectRatio: CropAspectRatioPreset.original,
+        lockAspectRatio: false,
+      ),
+      iosUiSettings: IOSUiSettings(
+        title: 'Crop Image',
+      ),
+    );
+
+    if (croppedFile != null) {
+      // Handle the cropped image file
+      // You can save or process the cropped image as needed
+    }
+  }
+
+  Future<void> _showSelectedImageDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Selected Image'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                if (_selectedImage != null)
+                  Image.file(_selectedImage!, height: 200, width: 200),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
