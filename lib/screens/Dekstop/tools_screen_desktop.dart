@@ -12,6 +12,7 @@ import '../../providers/tools_provider.dart';
 import '../../ui/colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:crop_your_image/crop_your_image.dart';
 
 class ToolsScreenDesktop extends StatefulWidget {
   const ToolsScreenDesktop({super.key});
@@ -23,16 +24,63 @@ class ToolsScreenDesktop extends StatefulWidget {
 List<Widget> _lessonComponents = [];
 List<Widget> _toolsComponents = [];
 
-/*const List<String> list = <String>['One', 'Two', 'Three', 'Four'];*/
+final _cropController = CropController();
 
 class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
   String dropdownClassValue = "";
   String dropdownSubjectValue = "";
   TextEditingController questionTextFieldController = TextEditingController();
   late ToolsDataProvider toolsDataProvider;
-  /*late ToolsResponseProvider toolsResponseProvider;*/
 
   File? _selectedImage;
+
+  DropdownMenu<String> buildDropdownMenuClass() {
+    return DropdownMenu<String>(
+      onSelected: (String? value) {
+        setState(() {
+          _selectedClassName = value!;
+          print("$_selectedClassName << Selectedclassname");
+        });
+      },
+      dropdownMenuEntries: toolsDataProvider.toolsData?.classList
+              .map<DropdownMenuEntry<String>>((ClassInfo classInfo) {
+            return DropdownMenuEntry<String>(
+              value: classInfo.className,
+              label: classInfo.className,
+            );
+          }).toList() ??
+          [],
+    );
+  }
+
+  DropdownMenu<String> buildDropdownMenuSubjects() {
+    return DropdownMenu<String>(
+      onSelected: (String? value) {
+        // This is called when the user selects an item.
+        setState(() {
+          _selectedSubjectName = value!;
+          print("$_selectedSubjectName << _selectedSubjectName");
+        });
+      },
+      dropdownMenuEntries: toolsDataProvider.toolsData?.subjectList
+              .map<DropdownMenuEntry<String>>((Subject subject) {
+            return DropdownMenuEntry<String>(
+              value: subject.subjectName,
+              label: subject.subjectName,
+            );
+          }).toList() ??
+          [],
+    );
+  }
+
+  void resetSelectedClassAndSubject() {
+    setState(() {
+      _selectedClassName =
+          'null'; // Set it to the initial value or an appropriate default
+      _selectedSubjectName =
+          'null'; // Set it to the initial value or an appropriate default
+    });
+  }
 
   /*final controller = CropController(
     aspectRatio: 1,
@@ -47,10 +95,18 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
   late String _selectedSubjectName = 'null';
   late String _question = '';
 
+  bool maxWordVisibility = false;
+  bool subjectSelectionVisibility = false;
+  bool mathKeyboardVisibility = false;
+
+  /*COMMON TOOL BUTTONS*/
   ElevatedButton buildToolButton(
     String toolName,
     String toolsCode,
-    int toolId, {
+    int toolId,
+    String subject,
+    String maxWord,
+    String mathKeyboard, {
     required VoidCallback onToolSelected,
   }) {
     return ElevatedButton(
@@ -58,15 +114,37 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
         backgroundColor: AppColors.primaryColor,
       ),
       onPressed: () {
+        resetSelectedClassAndSubject();
         onToolSelected();
         _selectedToolsCode = toolsCode;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                "$toolName Selected >> $toolsCode << and tools id >> $toolId"),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        if (maxWord == "Y") {
+          setState(() {
+            maxWordVisibility = true;
+          });
+        } else {
+          setState(() {
+            maxWordVisibility = false;
+          });
+        }
+        if (mathKeyboard == "Y") {
+          setState(() {
+            mathKeyboardVisibility = true;
+          });
+        } else {
+          setState(() {
+            mathKeyboardVisibility = false;
+          });
+        }
+
+        if (subject == "Y") {
+          setState(() {
+            subjectSelectionVisibility = true;
+          });
+        } else {
+          setState(() {
+            subjectSelectionVisibility = false;
+          });
+        }
       },
       child: Text(toolName),
     );
@@ -92,49 +170,56 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
       ),
       body: Row(
         children: [
+          /*Tools List*/
           Expanded(
             flex: 2,
             child: Container(
               height: double.infinity,
               color: AppColors.backgroundColorDark,
-              child: FutureBuilder(
-                future:
-                    toolsProvider.fetchTools(), // Call the fetchTools method
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    // Display your list of tools
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: toolsProvider.tools.map((tool) {
-                          return Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                            height: 50,
-                            child: buildToolButton(
-                              tool.toolName,
-                              tool.toolsCode,
-                              tool.toolID,
-                              onToolSelected: () {
-                                // Call the API when a tool is selected
-                                toolsDataProvider.fetchToolsData(
-                                  userID, // replace with the actual user ID
-                                  tool.toolID,
-                                );
-                              },
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  }
-                },
-              ),
+              child: Builder(builder: (context) {
+                return FutureBuilder(
+                  future:
+                      toolsProvider.fetchTools(), // Call the fetchTools method
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      // Display your list of tools
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: toolsProvider.tools.map((tool) {
+                            return Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                              height: 50,
+                              child: buildToolButton(
+                                tool.toolName,
+                                tool.toolsCode,
+                                tool.toolID,
+                                tool.subject,
+                                tool.maxWord,
+                                tool.mathKeyboard,
+                                onToolSelected: () {
+                                  // Call the API when a tool is selected
+                                  toolsDataProvider.fetchToolsData(
+                                    userID, // replace with the actual user ID
+                                    tool.toolID,
+                                  );
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    }
+                  },
+                );
+              }),
             ),
           ),
+          /*TOLLS COMPONENTS VIEW*/
           Expanded(
             flex: 8,
             child: Container(
@@ -164,11 +249,10 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                       ),
                     ),
                   ),
-                  /*BOTTOM CONTROL 1*/
-
-                  /*BOTTOM CONTROL 2*/
+                  /*BOTTOM CONTROL*/
                   Column(
                     children: [
+                      /*BOTTOM CONTROL 1ST ROW*/
                       Container(
                         width: double.infinity,
                         padding: EdgeInsets.all(10),
@@ -187,81 +271,61 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                               child: Row(
                                 children: [
                                   Text("Class "),
-                                  DropdownMenu<String>(
-                                    onSelected: (String? value) {
-                                      // This is called when the user selects an item.
-                                      setState(() {
-                                        _selectedClassName = value!;
-                                        print(
-                                            "$_selectedClassName << Selectedclassname");
-                                      });
+                                  Consumer<ToolsDataProvider>(
+                                    builder:
+                                        (context, toolsDataProvider, child) {
+                                      return buildDropdownMenuClass();
                                     },
-                                    dropdownMenuEntries: toolsDataProvider
-                                            .toolsData?.classList
-                                            .map<DropdownMenuEntry<String>>(
-                                                (ClassInfo classInfo) {
-                                          return DropdownMenuEntry<String>(
-                                            value: classInfo.className,
-                                            label: classInfo.className,
-                                          );
-                                        }).toList() ??
-                                        [],
-                                  ),
+                                  )
                                 ],
                               ),
                             ),
                             /*SELECTED SUBJECT*/
-                            Container(
-                              padding: EdgeInsets.all(5),
-                              child: Row(
-                                children: [
-                                  Text("Subject "),
-                                  DropdownMenu<String>(
-                                    onSelected: (String? value) {
-                                      // This is called when the user selects an item.
-                                      setState(() {
-                                        _selectedSubjectName = value!;
-                                        print(
-                                            "$_selectedSubjectName << _selectedSubjectName");
-                                      });
-                                    },
-                                    dropdownMenuEntries: toolsDataProvider
-                                            .toolsData?.subjectList
-                                            .map<DropdownMenuEntry<String>>(
-                                                (Subject subject) {
-                                          return DropdownMenuEntry<String>(
-                                            value: subject.subjectName,
-                                            label: subject.subjectName,
-                                          );
-                                        }).toList() ??
-                                        [],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
+                            Visibility(
+                              visible: subjectSelectionVisibility,
                               child: Container(
                                 padding: EdgeInsets.all(5),
-                                child: TextField(
-                                  maxLines: 3,
-                                  minLines: 1,
-                                  cursorColor: AppColors.primaryColor,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Max lines..',
-                                    border: OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: AppColors.primaryColor,
+                                child: Row(
+                                  children: [
+                                    Text("Subject "),
+                                    Consumer<ToolsDataProvider>(
+                                      builder:
+                                          (context, toolsDataProvider, child) {
+                                        return buildDropdownMenuSubjects();
+                                      },
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            /*MAX LINES*/
+                            Visibility(
+                              visible: maxWordVisibility,
+                              child: Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(5),
+                                  child: TextField(
+                                    maxLines: 3,
+                                    minLines: 1,
+                                    cursorColor: AppColors.primaryColor,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Max lines..',
+                                      border: OutlineInputBorder(),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: AppColors.primaryColor,
+                                        ),
                                       ),
                                     ),
+                                    onChanged: (value) {},
                                   ),
-                                  onChanged: (value) {},
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
+                      /*BOTTOM CONTROL 2ND ROW*/
                       Container(
                         width: double.infinity,
                         padding: EdgeInsets.all(16),
@@ -275,7 +339,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            /*ADD DOCUMENT*/
+                            /*ADD DOCUMENT BUTTON*/
                             ElevatedButton(
                               onPressed: () {},
                               style: ElevatedButton.styleFrom(
@@ -286,6 +350,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                 color: AppColors.primaryColor,
                               ),
                             ),
+                            /*TYPE MESSAGE*/
                             Expanded(
                               child: TextField(
                                 controller: questionTextFieldController,
@@ -306,6 +371,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                 },
                               ),
                             ),
+                            /*BUTTON CONTROLS IMAGE, KEYBOARD, SEND*/
                             Container(
                               child: Row(
                                 children: [
@@ -327,6 +393,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                   ),
                                   /*MATH KEYBOARD*/
                                   Visibility(
+                                    visible: mathKeyboardVisibility,
                                     child: ElevatedButton(
                                       onPressed: () {},
                                       style: ElevatedButton.styleFrom(
