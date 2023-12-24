@@ -10,8 +10,14 @@ class ToolsResponseProvider extends ChangeNotifier {
   ToolsResponseDataModel? _toolsResponse;
   ToolsResponseDataModel? get toolsResponse => _toolsResponse;
 
-  Future<void> fetchToolsResponse(int userId, String questionText,
-      String subject, String gradeClass, String toolsCode) async {
+  Future<void> fetchToolsResponse(
+      int userId,
+      String questionText,
+      String subject,
+      String gradeClass,
+      String toolsCode,
+      String maxLine,
+      String isMobile) async {
     print("inside fetchToolsResponse");
     try {
       final response = await _apiService.getToolsResponse(
@@ -20,6 +26,8 @@ class ToolsResponseProvider extends ChangeNotifier {
         subject,
         gradeClass,
         toolsCode,
+        maxLine,
+        isMobile,
       );
       _toolsResponse = ToolsResponseDataModel.fromJson(response);
       print("Response from fetchToolsResponse: $response");

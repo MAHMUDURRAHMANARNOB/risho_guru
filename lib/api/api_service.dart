@@ -261,8 +261,14 @@ class ApiService {
   }
 
   /*Tools Response*/
-  Future<Map<String, dynamic>> getToolsResponse(int userid, String questiontext,
-      String subject, String gradeclass, String toolscode) async {
+  Future<Map<String, dynamic>> getToolsResponse(
+      int userid,
+      String questiontext,
+      String subject,
+      String gradeclass,
+      String toolscode,
+      String maxline,
+      String isMobile) async {
     final url = '$baseUrl/gettoolsresponse/';
     print(
         "Posting in api service $url, $userid, $questiontext, $subject, $gradeclass, $toolscode");
@@ -275,6 +281,8 @@ class ApiService {
           'subject': subject.toString(),
           'gradeclass': gradeclass.toString(),
           'toolscode': toolscode.toString(),
+          'maxSentence': maxline.toString(),
+          'isMobileApp': isMobile.toString(),
         },
       );
       print("Response  $response");

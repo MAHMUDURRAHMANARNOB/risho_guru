@@ -82,6 +82,12 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
     });
   }
 
+  void resetLessonComponent() {
+    setState(() {
+      _lessonComponents = [];
+    });
+  }
+
   /*final controller = CropController(
     aspectRatio: 1,
     defaultCrop: const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9),
@@ -91,9 +97,12 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
   /*String dropdownValue = list.first;*/
 
   late String _selectedToolsCode;
+  late String _selectedToolName = '';
   late String _selectedClassName = 'null';
   late String _selectedSubjectName = 'null';
   late String _question = '';
+  late String _maxLine = '';
+  final String _isMobile = 'Y';
 
   bool maxWordVisibility = false;
   bool subjectSelectionVisibility = false;
@@ -116,7 +125,10 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
       onPressed: () {
         resetSelectedClassAndSubject();
         onToolSelected();
-        _selectedToolsCode = toolsCode;
+        setState(() {
+          _selectedToolsCode = toolsCode;
+          _selectedToolName = toolName;
+        });
         if (maxWord == "Y") {
           setState(() {
             maxWordVisibility = true;
@@ -162,11 +174,39 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
       print('Setting userId for ToolsProvider: ${toolsProvider.userId}');
     }
     toolsDataProvider = Provider.of<ToolsDataProvider>(context, listen: false);
+    print("selected Tool : $_selectedToolName");
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tools'),
+        title: Text('Home Work Tools'),
         automaticallyImplyLeading: false,
+        actions: [
+          Container(
+            margin: EdgeInsets.all(10.0),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    resetLessonComponent();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                  ),
+                  child: const Icon(
+                    Icons.cleaning_services_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                /*EARNED POINTS*/
+
+                Text(_selectedToolName),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Row(
         children: [
@@ -182,7 +222,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                       toolsProvider.fetchTools(), // Call the fetchTools method
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else {
@@ -192,7 +232,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                           children: toolsProvider.tools.map((tool) {
                             return Container(
                               width: double.infinity,
-                              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                              padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
                               height: 50,
                               child: buildToolButton(
                                 tool.toolName,
@@ -223,7 +263,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
           Expanded(
             flex: 8,
             child: Container(
-              margin: EdgeInsets.all(10),
+              margin: const EdgeInsets.all(10),
               child: Column(
                 children: [
                   /*TOOLS Components*/
@@ -265,7 +305,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                         ),
                         child: Row(
                           children: [
-                            /*SELCTED CLASS*/
+                            /*SELECTED CLASS*/
                             Container(
                               padding: EdgeInsets.all(5),
                               child: Row(
@@ -305,11 +345,12 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                 child: Container(
                                   padding: EdgeInsets.all(5),
                                   child: TextField(
-                                    maxLines: 3,
-                                    minLines: 1,
+                                    keyboardType: TextInputType.number,
+                                    maxLines: 1,
                                     cursorColor: AppColors.primaryColor,
                                     decoration: const InputDecoration(
-                                      hintText: 'Max lines..',
+                                      hintText:
+                                          'Ender 1 to 50 word limit you want',
                                       border: OutlineInputBorder(),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
@@ -317,7 +358,45 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                         ),
                                       ),
                                     ),
-                                    onChanged: (value) {},
+                                    onChanged: (value) {
+                                      if (value.isNotEmpty) {
+                                        int? intValue = int.tryParse(value);
+                                        if (intValue == null) {
+                                          // Show a Snackbar if the entered value is not a valid integer
+                                          const snackBar = SnackBar(
+                                            backgroundColor:
+                                                AppColors.primaryColor,
+                                            content: Text(
+                                              'Enter a valid number',
+                                              style: TextStyle(
+                                                  color: AppColors
+                                                      .backgroundColorDark,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          );
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(snackBar);
+                                        } else if (intValue > 50) {
+                                          // Show a Snackbar if the entered value is greater than 50
+                                          const snackBar = SnackBar(
+                                            backgroundColor:
+                                                AppColors.primaryColor,
+                                            content: Text(
+                                              'Enter a number less than or equal to 50',
+                                              style: TextStyle(
+                                                  color: AppColors
+                                                      .backgroundColorDark,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          );
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(snackBar);
+                                        } else {
+                                          // Store the valid value
+                                          _maxLine = intValue.toString();
+                                        }
+                                      }
+                                    },
                                   ),
                                 ),
                               ),
@@ -418,7 +497,9 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                                 _question,
                                                 _selectedSubjectName,
                                                 _selectedClassName,
-                                                _selectedToolsCode),
+                                                _selectedToolsCode,
+                                                _maxLine,
+                                                _isMobile),
                                           );
                                           // Clear the text in the TextField
                                           questionTextFieldController.clear();
@@ -543,25 +624,21 @@ Widget generateComponentGettingResponse(
     String question,
     String selectedSubject,
     String selectedClass,
-    String selectedToolsCode) {
+    String selectedToolsCode,
+    String maxLine,
+    String isMobile) {
   bool _isPressed = false;
   final toolsResponseProvider =
       Provider.of<ToolsResponseProvider>(context, listen: false);
   return FutureBuilder<void>(
-    future: toolsResponseProvider.fetchToolsResponse(
-        userid, question, selectedSubject, selectedClass, selectedToolsCode),
+    future: toolsResponseProvider.fetchToolsResponse(userid, question,
+        selectedSubject, selectedClass, selectedToolsCode, maxLine, isMobile),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const CircularProgressIndicator(); // Loading state
       } else if (snapshot.hasError) {
         return Text('ErrorSnapshotFutureBuilder: ${snapshot.error}');
       } else {
-        /*final ansType =
-        toolsResponseProvider.lessonModel?.lessonAnswer.ansType.toString();*/
-        /*print(
-            'Selected course: $courseId \n Selected lesson: $lessonId \n userid: $userid \n ANSTYPE: $ansType');*/
-
-        // Your 'T' case code
         final lessonAnswer = toolsResponseProvider.toolsResponse;
         print(lessonAnswer!.answer.toString());
         final ansId = lessonAnswer.ticketId.toString();
