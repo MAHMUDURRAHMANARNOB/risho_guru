@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:risho_guru/api/responses/SubscribedCoursesResponse.dart';
 import 'package:risho_guru/api/responses/substiptionStatus_response.dart';
 import '../models/course.dart';
@@ -297,6 +299,74 @@ class ApiService {
     } catch (e) {
       throw Exception("Failed getToolsResponse $e");
     }
+  }
+
+  Future<Map<String, dynamic>> getImageToolsResponse(
+      File questionImage,
+      int userid,
+      String questiontext,
+      String subject,
+      String gradeclass,
+      String toolscode,
+      String maxline,
+      String isMobile) async {
+    final url = '$baseUrl/getimagetoolsresponse/';
+    print(
+        "Posting in api service $url $questionImage ,$userid, $questiontext, $subject, $gradeclass, $toolscode");
+    /*try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'questionimage': questionimage.toString(),
+          'userid': userid.toString(),
+          'questiontext': questiontext.toString(),
+          'subject': subject.toString(),
+          'gradeclass': gradeclass.toString(),
+          'toolscode': toolscode.toString(),
+          'maxSentence': maxline.toString(),
+          'isMobileApp': isMobile.toString(),
+        },
+      );
+      print("Response  $response");
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        print("Response in getToolsResponse " + response.body);
+        return json.decode(response.body);
+      } else {
+        // If the server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load data in getToolsResponse');
+      }
+    } catch (e) {
+      throw Exception("Failed getToolsResponse $e");
+    }*/
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.fields['userid'] = userid.toString();
+      request.fields['questiontext'] = questiontext.toString();
+      request.fields['subject'] = subject.toString();
+      request.fields['gradeclass'] = gradeclass.toString();
+      request.fields['toolscode'] = toolscode.toString();
+      request.fields['maxSentence'] = maxline.toString();
+      request.fields['isMobileApp'] =
+          isMobile.toString() == null ? isMobile.toString() : "50";
+      request.files.add(await http.MultipartFile.fromPath(
+          'questionimage', questionImage.path));
+      print("QUESTIONIMAGEPATH: ${questionImage.path}");
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        print('Image uploaded successfully');
+        print("Response in getToolsResponse " +
+            await response.stream.bytesToString());
+      } else {
+        print('Failed to upload image. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+      throw Exception("Failed getToolsResponse $e");
+    }
+    return {};
   }
 
   /*GET TOOLS DATA*/

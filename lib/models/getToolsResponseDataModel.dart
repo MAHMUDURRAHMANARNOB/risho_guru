@@ -1,9 +1,9 @@
 class ToolsResponseDataModel {
-  final int errorCode;
-  final String message;
-  final String question;
-  final String answer;
-  final int ticketId;
+  final int? errorCode;
+  final String? message;
+  final String? question;
+  final String? answer;
+  final int? ticketId;
 
   ToolsResponseDataModel({
     required this.errorCode,

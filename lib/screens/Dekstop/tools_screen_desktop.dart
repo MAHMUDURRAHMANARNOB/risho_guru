@@ -54,7 +54,30 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
   }
 
   DropdownMenu<String> buildDropdownMenuSubjects() {
+    List<DropdownMenuEntry<String>> dropdownEntries = [];
+
+    if (toolsDataProvider.toolsData?.subjectList != null) {
+      dropdownEntries = toolsDataProvider.toolsData!.subjectList
+          .map<DropdownMenuEntry<String>>((Subject subject) {
+        return DropdownMenuEntry<String>(
+          value: subject.subjectName,
+          label: subject.subjectName,
+        );
+      }).toList();
+    }
+
     return DropdownMenu<String>(
+      onSelected: (String? value) {
+        // This is called when the user selects an item.
+        setState(() {
+          _selectedSubjectName = value!;
+          print("$_selectedSubjectName << _selectedSubjectName");
+        });
+      },
+      dropdownMenuEntries: dropdownEntries,
+    );
+
+    /*return DropdownMenu<String>(
       onSelected: (String? value) {
         // This is called when the user selects an item.
         setState(() {
@@ -70,7 +93,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
             );
           }).toList() ??
           [],
-    );
+    );*/
   }
 
   void resetSelectedClassAndSubject() {
@@ -94,6 +117,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
   );*/
 
   bool isSelected = false;
+  bool isImagePicked = false;
   /*String dropdownValue = list.first;*/
 
   late String _selectedToolsCode;
@@ -244,7 +268,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                 onToolSelected: () {
                                   // Call the API when a tool is selected
                                   toolsDataProvider.fetchToolsData(
-                                    userID, // replace with the actual user ID
+                                    userID,
                                     tool.toolID,
                                   );
                                 },
@@ -459,6 +483,9 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                     child: ElevatedButton(
                                       onPressed: () {
                                         _pickImage(context);
+                                        setState(() {
+                                          isImagePicked = true;
+                                        });
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
@@ -489,21 +516,40 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                   Visibility(
                                     child: ElevatedButton(
                                       onPressed: () {
-                                        setState(() {
-                                          _lessonComponents.add(
-                                            generateComponentGettingResponse(
-                                                context,
-                                                userID,
-                                                _question,
-                                                _selectedSubjectName,
-                                                _selectedClassName,
-                                                _selectedToolsCode,
-                                                _maxLine,
-                                                _isMobile),
-                                          );
-                                          // Clear the text in the TextField
-                                          questionTextFieldController.clear();
-                                        });
+                                        if (isImagePicked) {
+                                          setState(() {
+                                            _lessonComponents.add(
+                                              generateComponentGettingImageResponse(
+                                                  context,
+                                                  _selectedImage!,
+                                                  userID,
+                                                  _question,
+                                                  _selectedSubjectName,
+                                                  _selectedClassName,
+                                                  _selectedToolsCode,
+                                                  _maxLine,
+                                                  _isMobile),
+                                            );
+                                            // Clear the text in the TextField
+                                            questionTextFieldController.clear();
+                                          });
+                                        } else {
+                                          setState(() {
+                                            _lessonComponents.add(
+                                              generateComponentGettingResponse(
+                                                  context,
+                                                  userID,
+                                                  _question,
+                                                  _selectedSubjectName,
+                                                  _selectedClassName,
+                                                  _selectedToolsCode,
+                                                  _maxLine,
+                                                  _isMobile),
+                                            );
+                                            // Clear the text in the TextField
+                                            questionTextFieldController.clear();
+                                          });
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
@@ -532,7 +578,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
     );
   }
 
-  Future<void> _pickImage(BuildContext context) async {
+  Future<File?> _pickImage(BuildContext context) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
@@ -541,7 +587,11 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
         _selectedImage = File(pickedFile.path);
       });
 
-      _showSelectedImageDialog(context);
+      print("file picked ${pickedFile.path}");
+      return File(pickedFile.path);
+    } else {
+      print("nothing picked");
+      return null;
     }
   }
 
@@ -573,7 +623,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
       compressQuality: 100,
       maxWidth: 800,
       maxHeight: 800,
-      androidUiSettings: AndroidUiSettings(
+      androidUiSettings: const AndroidUiSettings(
         toolbarTitle: 'Crop Image',
         toolbarColor: Colors.blue,
         toolbarWidgetColor: Colors.white,
@@ -591,7 +641,8 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
     }
   }
 
-  Future<void> _showSelectedImageDialog(BuildContext context) async {
+  Future<void> _showSelectedImageDialog(
+      BuildContext context, File selectedImage) async {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -633,6 +684,149 @@ Widget generateComponentGettingResponse(
   return FutureBuilder<void>(
     future: toolsResponseProvider.fetchToolsResponse(userid, question,
         selectedSubject, selectedClass, selectedToolsCode, maxLine, isMobile),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const CircularProgressIndicator(); // Loading state
+      } else if (snapshot.hasError) {
+        return Text('ErrorSnapshotFutureBuilder: ${snapshot.error}');
+      } else {
+        final lessonAnswer = toolsResponseProvider.toolsResponse;
+        print(lessonAnswer!.answer.toString());
+        final ansId = lessonAnswer.ticketId.toString();
+        return Container(
+          // Your 'T' case UI code
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /*Top Part*/
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "$selectedClass -- $selectedSubject \n $question",
+                  ),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.thumb_up_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {
+                              /*setState(() {
+                                _lessonComponents.add(
+                                  generateTranslationforAnswer(ansId),
+                                );
+                              });*/
+                            },
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.volume_up_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 16,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          margin: EdgeInsets.all(2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.question_answer_outlined,
+                              color: AppColors.secondaryColor,
+                              size: 14,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.more_horiz,
+                            color: AppColors.secondaryColor,
+                          ),
+                          onPressed: () {
+                            // Implement your logic to show a popup menu here
+                            // For example, use a PopupMenuButton
+                            /*setState(() {
+                              showPopupMenuPOP(
+                                  context,
+                                  const Offset(0, 40),
+                                  context.findRenderObject() as RenderBox,
+                                  courseIndex);
+                            });*/
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SingleChildScrollView(
+                child: Container(
+                  margin: const EdgeInsets.all(10.0),
+                  padding: const EdgeInsets.all(10.0),
+                  height: 400,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Markdown(
+                    data: lessonAnswer.answer.toString(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    },
+  );
+}
+
+Widget generateComponentGettingImageResponse(
+    BuildContext context,
+    File questionImage,
+    int userid,
+    String question,
+    String selectedSubject,
+    String selectedClass,
+    String selectedToolsCode,
+    String maxLine,
+    String isMobile) {
+  final toolsResponseProvider =
+      Provider.of<ToolsResponseProvider>(context, listen: false);
+  return FutureBuilder<void>(
+    future: toolsResponseProvider.fetchImageToolsResponse(
+        questionImage,
+        userid,
+        question,
+        selectedSubject,
+        selectedClass,
+        selectedToolsCode,
+        maxLine,
+        isMobile),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const CircularProgressIndicator(); // Loading state
