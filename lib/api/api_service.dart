@@ -10,6 +10,7 @@ import 'responses/login_response.dart';
 
 class ApiService {
   static const String baseUrl = 'https://testapi.risho.guru';
+
   /*LOGIN*/
   static Future<LoginResponse> loginApi(
       String username, String password) async {
@@ -301,6 +302,7 @@ class ApiService {
     }
   }
 
+  /*IMAGE TOOLS RESPONSE*/
   Future<Map<String, dynamic>> getImageToolsResponse(
       File questionImage,
       int userid,
