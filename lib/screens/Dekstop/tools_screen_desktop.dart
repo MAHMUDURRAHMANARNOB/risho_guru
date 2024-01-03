@@ -76,24 +76,6 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
       },
       dropdownMenuEntries: dropdownEntries,
     );
-
-    /*return DropdownMenu<String>(
-      onSelected: (String? value) {
-        // This is called when the user selects an item.
-        setState(() {
-          _selectedSubjectName = value!;
-          print("$_selectedSubjectName << _selectedSubjectName");
-        });
-      },
-      dropdownMenuEntries: toolsDataProvider.toolsData?.subjectList
-              .map<DropdownMenuEntry<String>>((Subject subject) {
-            return DropdownMenuEntry<String>(
-              value: subject.subjectName,
-              label: subject.subjectName,
-            );
-          }).toList() ??
-          [],
-    );*/
   }
 
   void resetSelectedClassAndSubject() {
@@ -492,7 +474,7 @@ class _ToolsScreenDesktopState extends State<ToolsScreenDesktop> {
                                             AppColors.backgroundColorDark,
                                       ),
                                       child: const Icon(
-                                        Icons.image_rounded,
+                                        Icons.add_a_photo_outlined,
                                         color: AppColors.primaryColor,
                                       ),
                                     ),

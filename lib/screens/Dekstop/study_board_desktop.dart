@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:html/parser.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:risho_guru/providers/getEssayQuestion_provider.dart';
 import 'package:risho_guru/providers/getTaslation_provider.dart';
 /*import 'package:markdown/markdown.dart' as md;*/
 import 'package:risho_guru/ui/colors.dart';
@@ -19,21 +22,28 @@ class StudyBoardDesktop extends StatefulWidget {
   State<StudyBoardDesktop> createState() => _StudyBoardDesktopState();
 }
 
+List<Widget> _lessonComponents = [];
+
 class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
   bool _isPressed = false;
+  bool _askQuestionActive = false;
   int _selectedIndex = 0;
   String inputText = '';
   late List<Course>? _courses = [];
   late List<List<int>> _selectedIndices;
 
-  int _selectedLessonIndex = -1;
-  int courseIndex = -1;
+  int _selectedLessonIndex = 0;
+  int courseIndex = 0;
   int selectedCourseId = 0;
   int selectedLessonId = 0;
   int userid = 0;
-  List<String> _lessonContents = [];
-  List<Widget> _lessonComponents = [];
   bool isListViewVisible = false; // Add this variable
+
+  File? _selectedImage;
+
+  late String _selectedCourse = 'null';
+  late String _selectedChapter = 'null';
+  late String _selectedLesson = 'null';
 
   @override
   void initState() {
@@ -42,12 +52,31 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
     _selectedIndices = List.generate(_courses!.length, (index) => []);
   }
 
-  void togglePressed() {
+  void resetSelectedClassAndSubject() {
+    setState(() {
+      /*_selectedCourse =
+          'null';*/ // Set it to the initial value or an appropriate default
+      _selectedLesson =
+          'null'; // Set it to the initial value or an appropriate default
+      _selectedLessonIndex = -1;
+      courseIndex = -1;
+      /*selectedCourseId = 0;*/
+      selectedLessonId = 0;
+    });
+  }
+
+  void resetLessonComponent() {
+    setState(() {
+      _lessonComponents = [];
+    });
+  }
+
+  /*void togglePressed() {
     setState(() {
       _isPressed = !_isPressed;
       print('isPressed: $_isPressed');
     });
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +88,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
 
     _courses = courseProvider.courses ?? [];
 
-    print("courses in studyboard = $_courses");
+    /*print("courses in studyboard = $_courses");*/
 
     return Scaffold(
       appBar: AppBar(
@@ -70,6 +99,19 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
             margin: EdgeInsets.all(10.0),
             child: Row(
               children: [
+                ElevatedButton(
+                  onPressed: () {
+                    resetLessonComponent();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                  ),
+                  child: const Icon(
+                    Icons.cleaning_services_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -109,6 +151,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
       ),
       body: Row(
         children: [
+          /*LEFT COURSE CONTAINER*/
           Expanded(
             flex: 2,
             child: Container(
@@ -129,8 +172,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                         borderRadius: BorderRadius.circular(8),
                         color: AppColors.primaryColor,
                       ),
-                      margin: EdgeInsets.fromLTRB(10, 10.0, 10, 10.0),
-                      padding: EdgeInsets.all(16.0),
+                      margin: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 5.0),
+                      padding: const EdgeInsets.all(12.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -179,7 +222,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                   itemCount: courses.length,
                                   itemBuilder: (context, courseIndex) {
                                     var course = courses[courseIndex];
-                                    selectedCourseId = course.courseId;
+
                                     return Container(
                                       margin: EdgeInsets.all(2.0),
                                       decoration: BoxDecoration(
@@ -187,11 +230,23 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                         color: Colors.grey[800],
                                       ),
                                       child: ExpansionTile(
-                                        title: Text(
-                                          course.courseName,
-                                          style: const TextStyle(
-                                            fontSize: 14,
+                                        title: MaterialButton(
+                                          child: Text(
+                                            course.courseName,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
                                           ),
+                                          onPressed: () {
+                                            setState(() {
+                                              selectedCourseId =
+                                                  course.courseId;
+                                              _selectedCourse =
+                                                  course.courseName;
+
+                                              resetSelectedClassAndSubject();
+                                            });
+                                          },
                                         ),
                                         children: _buildLessonList(courseIndex,
                                             course.chapters, selectedCourseId),
@@ -219,8 +274,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                         borderRadius: BorderRadius.circular(8),
                         color: AppColors.primaryColor,
                       ),
-                      margin: EdgeInsets.fromLTRB(10, 10.0, 10, 10.0),
-                      padding: EdgeInsets.all(16.0),
+                      margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+                      padding: EdgeInsets.all(12.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -245,10 +300,45 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
               ),
             ),
           ),
+          /*RIGHT LESSON COMPONENT CONTAINER*/
           Expanded(
             flex: 8,
             child: Column(
               children: [
+                /*TOP CONTAINER*/
+                Container(
+                  width: double.infinity,
+                  color: AppColors.backgroundColorDark,
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Selected Course: ",
+                        style: TextStyle(color: AppColors.primaryColor),
+                      ),
+                      Text(_selectedCourse),
+                      const SizedBox(width: 16.0),
+                      Text(
+                        "Selected Lesson: ",
+                        style: TextStyle(color: AppColors.primaryColor),
+                      ),
+                      SizedBox(
+                        width: 300.0,
+                        child: Text(
+                          _selectedLesson,
+                          overflow: TextOverflow.fade,
+                          softWrap: false,
+                        ),
+                      ),
+                      const SizedBox(width: 16.0),
+                      Text(
+                        "Class: ",
+                        style: TextStyle(color: AppColors.primaryColor),
+                      ),
+                      Text(_selectedLessonIndex.toString()),
+                    ],
+                  ),
+                ),
                 /*STUDY BOARD COMPONENTS LOADING PART*/
                 Expanded(
                   flex: 2,
@@ -273,11 +363,51 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                   ),
                 ),
                 /*QUESTION ASKING BOX*/
+                Visibility(
+                  visible: _askQuestionActive,
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+                    padding: const EdgeInsets.all(5.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Lesson: $_selectedLesson"),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.backgroundColorDark),
+                          onPressed: () {
+                            // Add your logic to send the message
+                            setState(() {
+                              _askQuestionActive = false;
+                            });
+                          },
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: AppColors.primaryColor,
+                            size: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 Container(
                   color: AppColors.backgroundColorDark,
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(5.0),
                   child: Row(
                     children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.backgroundColorDark),
+                        onPressed: () {
+                          _pickImage(context);
+                        },
+                        child: const Icon(
+                          Icons.add_a_photo_outlined,
+                          color: AppColors.primaryColor,
+                          size: 18,
+                        ),
+                      ),
                       Expanded(
                         child: TextField(
                           maxLines: 3,
@@ -291,25 +421,18 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                 color: AppColors.primaryColor,
                               ),
                             ),
-                            prefixIcon: Icon(
-                              Icons.add_circle_outline,
-                              color: AppColors.primaryColor,
-                            ),
                           ),
                           onChanged: (value) {
                             inputText = value;
                           },
                         ),
                       ),
-                      const SizedBox(width: 16.0),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.backgroundColorDark),
                         onPressed: () {
                           // Add your logic to send the message
                           setState(() {
-                            _lessonContents
-                                .add('$inputText : ${DateTime.now()}');
                             _lessonComponents.add(generateComponent(
                                 userid,
                                 inputText,
@@ -371,6 +494,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     onTap: () {
                       // Handle onTap for lesson
                       setState(() {
+                        _selectedLesson = lesson.lessonTitle;
                         selectedLessonId = lesson.lessonId;
                         _selectedLessonIndex = lessonIndex;
                         _lessonComponents.add(generateComponentGettingAnswer(
@@ -394,6 +518,76 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
         ],
       );
     }).toList();
+  }
+
+  /*BUTTONS UNDER RESPONSE*/
+  Widget _menuButtonRow(int answerId) {
+    return Container(
+      width: double.infinity,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+            ),
+            onPressed: () {
+              setState(() {
+                _askQuestionActive = true;
+              });
+            },
+            child: Text("Ask Question"),
+          ),
+          ElevatedButton(
+            onPressed: () {},
+            child: Text("MCQ Exam"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _lessonComponents.add(
+                  generateEssayQuestions(selectedLessonId),
+                );
+              });
+            },
+            child: Text("Generate Questions"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {},
+            child: Text("Play Audio"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {},
+            child: Text("Show Video Content"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _lessonComponents.add(
+                  generateTranslationforAnswer(answerId),
+                );
+              });
+            },
+            child: Text("Translation"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /*LESSON ANSWER GENERATOR*/
@@ -421,6 +615,8 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
               // Your 'T' case code
               final lessonAnswer = lessonProvider.lessonModel!.lessonAnswer;
               print(lessonAnswer.textAns);
+
+              final answer = lessonAnswer.textAns ?? "No answer available";
               final ansId = lessonAnswer.answerId;
               return Container(
                 // Your 'T' case UI code
@@ -451,13 +647,7 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                                     color: AppColors.secondaryColor,
                                     size: 14,
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _lessonComponents.add(
-                                        generateTranslationforAnswer(ansId),
-                                      );
-                                    });
-                                  },
+                                  onPressed: () {},
                                 ),
                               ),
                               Container(
@@ -512,6 +702,15 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                         ),
                       ],
                     ),
+                    /*LESSONNAME*/
+                    Container(
+                      width: double.infinity,
+                      child: Text(
+                        _selectedLesson,
+                        style: TextStyle(color: AppColors.secondaryColor),
+                      ),
+                    ),
+                    /*ANSWER RESPONSE*/
                     SingleChildScrollView(
                       child: Container(
                         margin: const EdgeInsets.all(10.0),
@@ -522,16 +721,24 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                         child: Markdown(
-                          data: lessonAnswer.textAns.toString(),
+                          data: answer.toString(),
                         ),
                       ),
                     ),
+                    /*MENU BUTTONS*/
+                    Container(
+                      child: _menuButtonRow(ansId),
+                    )
                   ],
                 ),
               );
             default:
               // Your default case code
-              return Text("No Text Available");
+              final lessonAnswer = lessonProvider.lessonModel?.lessonAnswer;
+              print(lessonAnswer?.textAns);
+
+              String? answer = lessonAnswer?.textAns;
+              return Text(answer!);
           }
         }
       },
@@ -574,6 +781,9 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
                     ),
                     child: Markdown(
                       data: traslation.toString(),
+                      styleSheet: MarkdownStyleSheet(
+                        a: TextStyle(fontSize: 12),
+                      ),
                     ),
                   ),
                 ),
@@ -712,6 +922,152 @@ class _StudyBoardDesktopState extends State<StudyBoardDesktop> {
               return Text(inputText);
           }
         }
+      },
+    );
+  }
+
+  /*ASK QUESTION COMPONENT*/
+
+  /*MCQ EXAM COMPONENT*/
+
+  /*GENERATE QUESTION COMPONENT*/
+  Widget generateEssayQuestions(int lessonId) {
+    final getEssayQuestionProvider =
+        Provider.of<EssayQuestionProvider>(context, listen: false);
+    return FutureBuilder<void>(
+      future: getEssayQuestionProvider.fetchEssayQuestionResponse(lessonId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // Loading state
+        } else if (snapshot.hasError) {
+          return Text('ErrorSnapshotFutureBuilder: ${snapshot.error}');
+        } else {
+          final essayQuesResponse =
+              getEssayQuestionProvider.essayQuestionResponse;
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                child: Row(
+                  children: [
+                    Text(
+                      "Essay Questions for: ",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      "$_selectedLesson",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              Container(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: getEssayQuestionProvider
+                      .essayQuestionResponse?.questionList.length,
+                  itemBuilder: (context, questionIndex) {
+                    /*var lesson = chapter.lessonList[lessonIndex];
+                    bool isSelected = lessonIndex == _selectedLessonIndex;*/
+                    final question =
+                        essayQuesResponse?.questionList[questionIndex];
+                    String questionText = question?.questionText ?? '';
+                    String answerText = question?.ansText ?? '';
+                    return Container(
+                      // Your 'T' case UI code
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[800],
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Text(
+                              "Question: $questionText",
+                              style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[800],
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Text("Answer: $answerText"),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  /*PLAY AUDIO COMPONENT*/
+
+  /*SHOW VIDEO COMPONENT*/
+
+  /*PICK IMAGE*/
+  Future<File?> _pickImage(BuildContext context) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+        _showSelectedImageDialog(context, _selectedImage!);
+      });
+
+      print("file picked ${pickedFile.path}");
+      return File(pickedFile.path);
+    } else {
+      print("nothing picked");
+      return null;
+    }
+  }
+
+  Future<void> _showSelectedImageDialog(
+      BuildContext context, File selectedImage) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Selected Image'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                if (_selectedImage != null)
+                  Image.file(_selectedImage!, height: 200, width: 200),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }

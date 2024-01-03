@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:risho_guru/providers/auth_provider.dart';
 import 'package:risho_guru/providers/courses_provider.dart';
+import 'package:risho_guru/providers/getEssayQuestion_provider.dart';
 import 'package:risho_guru/providers/getLessonAnswer_Provider.dart';
 import 'package:risho_guru/providers/getTaslation_provider.dart';
 import 'package:risho_guru/providers/getToolsData_provider.dart';
@@ -40,6 +41,9 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (context) => ToolsResponseProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => EssayQuestionProvider(),
         ),
       ],
       child: RishoGuru(),
